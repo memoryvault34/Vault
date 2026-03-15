@@ -1,154 +1,882 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>VAULT | Archive</title>
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VAULT — Memory Archive</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Raleway:wght@200;300;400;500;600&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    :root {
+      --bg0:      #1A0F08;
+      --bg1:      #251508;
+      --bg2:      #2E1A0C;
+      --bg3:      #3A2210;
+      --sunset1:  #C45C2A;
+      --sunset2:  #D4743A;
+      --sunset3:  #E8914A;
+      --sunset4:  #F0A85C;
+      --sunset5:  #F5C080;
+      --gold:     #E8A840;
+      --gold2:    #F5C860;
+      --gold-dim: rgba(232,168,64,0.25);
+      --gold-glow:rgba(232,168,64,0.12);
+      --cream:    #F5EDE0;
+      --cream70:  rgba(245,237,224,0.70);
+      --cream40:  rgba(245,237,224,0.40);
+      --cream20:  rgba(245,237,224,0.20);
+      --cream10:  rgba(245,237,224,0.10);
+      --cream06:  rgba(245,237,224,0.06);
+      --border:   rgba(232,168,64,0.18);
+      --borderS:  rgba(245,237,224,0.10);
+    }
+    body { background: var(--bg1); color: var(--cream); font-family: 'Raleway', sans-serif; }
+    #root { min-height: 100vh; }
+    ::-webkit-scrollbar { width: 3px; }
+    ::-webkit-scrollbar-thumb { background: var(--sunset1); border-radius: 3px; }
+    input, textarea, select { font-family: inherit; outline: none; }
+    button { font-family: inherit; cursor: pointer; border: none; background: none; }
+    input[type="date"] { color-scheme: dark; }
+    input::placeholder  { color: var(--cream40); }
+    textarea::placeholder { color: var(--cream40); }
+
+```
+@keyframes fadeUp  { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+@keyframes fadeIn  { from{opacity:0} to{opacity:1} }
+@keyframes scaleIn { from{opacity:0;transform:scale(0.94)} to{opacity:1;transform:scale(1)} }
+@keyframes spin    { to{transform:rotate(360deg)} }
+@keyframes shimmer { 0%{background-position:200% center} 100%{background-position:-200% center} }
+
+.fu { animation: fadeUp  0.55s cubic-bezier(.22,.68,0,1.15) both; }
+.fi { animation: fadeIn  0.3s  ease both; }
+.si { animation: scaleIn 0.35s cubic-bezier(.22,.68,0,1.1) both; }
+
+.gold-text {
+  background: linear-gradient(90deg, var(--sunset3), var(--gold2), var(--sunset4), var(--gold));
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 5s linear infinite;
+}
+.thread-line {
+  position: absolute; left: 50%; top: 0; bottom: 0; width: 2px;
+  transform: translateX(-50%);
+  background: linear-gradient(to bottom, transparent 0%, var(--sunset2) 8%, var(--gold) 30%, var(--sunset3) 50%, var(--gold) 70%, var(--sunset2) 92%, transparent 100%);
+  opacity: 0.5;
+}
+.thread-glow {
+  position: absolute; left: 50%; top: 0; bottom: 0; width: 6px;
+  transform: translateX(-50%);
+  background: linear-gradient(to bottom, transparent, var(--sunset3) 20%, var(--gold2) 50%, var(--sunset3) 80%, transparent);
+  filter: blur(6px); opacity: 0.25;
+}
+.thread-dot {
+  width: 13px; height: 13px; border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 0 3px var(--bg1), 0 0 0 5px var(--gold-dim), 0 0 16px var(--sunset3);
+  flex-shrink: 0; transition: all 0.35s ease;
+}
+.thread-dot.active {
+  width: 17px; height: 17px; background: var(--gold2);
+  box-shadow: 0 0 0 3px var(--bg1), 0 0 0 6px rgba(232,168,64,0.5), 0 0 28px var(--gold);
+}
+```
+
+  </style>
 </head>
 <body>
-    <div id="root"></div>
+  <div id="root"></div>
 
-    <script type="text/babel">
-        const { useState, useEffect } = React;
+  <script type="text/babel">
+    const { useState, useEffect, useRef, useCallback } = React;
 
-        // --- STYLES ---
-        const GlobalStyles = () => (
-            <style>{`
-                @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Raleway:wght@300;400;600&display=swap');
-                
-                :root {
-                    --bg0: #120A05; --bg1: #1A0F08; --bg2: #251508;
-                    --sunset: #C45C2A; --gold: #E8A840; --cream: #F5EDE0;
-                }
+    /* ── helpers ── */
+    const fmtShort = d => new Date(d).toLocaleDateString("en-US",{month:"short",year:"numeric"});
+    const getYr    = d => new Date(d).getFullYear();
+    const uid      = () => Math.random().toString(36).slice(2,9);
 
-                body { 
-                    background: var(--bg0); color: var(--cream); 
-                    font-family: 'Raleway', sans-serif; margin: 0; padding: 0;
-                    -webkit-font-smoothing: antialiased;
-                }
-
-                .gold-text { 
-                    background: linear-gradient(90deg, #E8A840, #F5C860);
-                    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-                    font-family: 'Playfair Display', serif;
-                }
-
-                .vault-card {
-                    background: var(--bg2); padding: 25px; border-radius: 20px;
-                    margin-bottom: 15px; border: 1px solid rgba(232,168,64,0.1);
-                    transition: transform 0.2s;
-                }
-
-                .vault-card:active { transform: scale(0.98); }
-
-                .input-field {
-                    width: 100%; background: var(--bg1); border: 1px solid rgba(245,237,224,0.2);
-                    padding: 15px; border-radius: 12px; color: white; margin-bottom: 15px;
-                }
-
-                .btn-gold {
-                    background: var(--gold); color: var(--bg0); border: none;
-                    padding: 15px 30px; border-radius: 12px; font-weight: 700;
-                    width: 100%; text-transform: uppercase; letter-spacing: 1px;
-                }
-                
-                .memory-item {
-                    background: rgba(255,255,255,0.03); padding: 15px;
-                    border-radius: 12px; margin-bottom: 10px; border-left: 3px solid var(--sunset);
-                }
-            `}</style>
-        );
-
-        const INIT_VAULTS = [
-            { id: 'family', name: 'Family Vault', icon: 'fa-house-chimney', color: '#C45C2A' },
-            { id: 'partner', name: 'Jordan', icon: 'fa-heart', color: '#D4743A' }
+    /* ── mock AI analysis ── */
+    async function runAIAnalysis(photos) {
+      return new Promise(res => setTimeout(() => {
+        const reasons = [
+          "Faces detected — likely a meaningful social moment",
+          "Date metadata falls within your selected range",
+          "Location data matches your parameters",
+          "Group composition suggests a celebration",
+          "High visual energy — possible milestone event",
+          "Similar to other memories already in this vault",
         ];
+        res(photos.map(p => ({
+          ...p,
+          aiScore: Math.random(),
+          aiReason: reasons[Math.floor(Math.random()*reasons.length)],
+          aiPick: Math.random() > 0.28,
+        })).sort((a,b)=>b.aiScore-a.aiScore));
+      }, 2400));
+    }
 
-        function App() {
-            const [view, setView] = useState('home');
-            const [selectedVault, setSelectedVault] = useState(null);
-            const [memories, setMemories] = useState(() => {
-                const saved = localStorage.getItem("vault_v3_data");
-                return saved ? JSON.parse(saved) : [];
-            });
+    /* ══ DATA ══ */
+    const INIT_VAULTS = [
+      { id:"family",  name:"Family",    icon:"⌂", color:"#C45C2A" },
+      { id:"partner", name:"Jordan",    icon:"◈", color:"#D4743A" },
+      { id:"friends", name:"The Crew",  icon:"◎", color:"#E8914A" },
+      { id:"solo",    name:"Just Me",   icon:"◇", color:"#F0A85C" },
+    ];
 
-            useEffect(() => {
-                localStorage.setItem("vault_v3_data", JSON.stringify(memories));
-            }, [memories]);
+    const INIT_MEMORIES = [
+      { id:"f1", vaultId:"family",  date:"2005-03-22", title:"Baby Sister Born",      desc:"Emma arrived and stole the spotlight forever.",            emoji:"👶" },
+      { id:"f2", vaultId:"family",  date:"2010-07-04", title:"Moved to Boston",       desc:"Chicago → Boston. A whole new chapter for everyone.",      emoji:"🚚" },
+      { id:"f3", vaultId:"family",  date:"2015-08-12", title:"Parents' 20th Anniv.",  desc:"A backyard dinner party. Mom cried. Dad pretended not to.", emoji:"💍" },
+      { id:"f4", vaultId:"family",  date:"2018-06-10", title:"My High School Grad",   desc:"The whole family drove six hours. Worth every mile.",       emoji:"🎓" },
+      { id:"f5", vaultId:"family",  date:"2020-11-26", title:"Pandemic Thanksgiving", desc:"Just the six of us. Somehow the best one yet.",             emoji:"🍂" },
+      { id:"f6", vaultId:"family",  date:"2022-05-15", title:"College Graduation",    desc:"They flew in. Front row. Ugly crying, all of them.",        emoji:"🎓" },
+      { id:"f7", vaultId:"family",  date:"2024-06-20", title:"Emma's Graduation",     desc:"My turn to be in the front row.",                           emoji:"🎓" },
+      { id:"p1", vaultId:"partner", date:"2021-02-14", title:"First Date",            desc:"Coffee that turned into dinner that turned into midnight.",  emoji:"◈" },
+      { id:"p2", vaultId:"partner", date:"2021-06-01", title:"Made It Official",      desc:"No grand gesture. Just — this is it, right? Yeah.",        emoji:"💌" },
+      { id:"p3", vaultId:"partner", date:"2021-09-10", title:"First Trip Together",   desc:"Amtrak to DC. Terrible Airbnb. Loved every second.",        emoji:"🚂" },
+      { id:"p4", vaultId:"partner", date:"2022-08-15", title:"Moved In Together",     desc:"Our apartment. IKEA until 2am.",                            emoji:"🏠" },
+      { id:"p5", vaultId:"partner", date:"2023-07-14", title:"Paris",                 desc:"Splurged. Worth every cent.",                               emoji:"🗼" },
+      { id:"p6", vaultId:"partner", date:"2024-08-03", title:"Adopted Luna",          desc:"She hates everyone except Jordan.",                          emoji:"🐾" },
+      { id:"r1", vaultId:"friends", date:"2019-06-15", title:"Road Trip West",        desc:"Five people, one car, zero plan.",                           emoji:"🚗" },
+      { id:"r2", vaultId:"friends", date:"2020-03-15", title:"Lockdown Calls",        desc:"Every Friday, 9pm. Never missed one.",                       emoji:"📱" },
+      { id:"r3", vaultId:"friends", date:"2021-08-20", title:"Beach House Week",      desc:"Seven people, one fridge. Lasted all week.",                 emoji:"🌊" },
+      { id:"r4", vaultId:"friends", date:"2022-12-31", title:"New Year's Rooftop",    desc:"Brooklyn rooftop. Cold as hell. Perfect.",                   emoji:"🎆" },
+      { id:"r5", vaultId:"friends", date:"2023-05-20", title:"Mike's Wedding",        desc:"First one of us. We held it together until the vows.",       emoji:"💍" },
+      { id:"s1", vaultId:"solo",    date:"2020-04-01", title:"Started Journaling",    desc:"Lockdown forced me inward. Best thing that happened.",       emoji:"📓" },
+      { id:"s2", vaultId:"solo",    date:"2022-03-05", title:"First Marathon",        desc:"4:12:34. Cried at mile 22.",                                 emoji:"🏅" },
+      { id:"s3", vaultId:"solo",    date:"2023-09-01", title:"Started Therapy",       desc:"Best decision. Hardest conversations.",                      emoji:"◇" },
+      { id:"s4", vaultId:"solo",    date:"2024-03-10", title:"Solo Trip to Lisbon",   desc:"Went alone. Came back different.",                           emoji:"✈️" },
+    ];
 
-            const addEntry = (vaultId) => {
-                const title = prompt("Describe this memory:");
-                if(!title) return;
-                const newMem = {
-                    id: Date.now(),
-                    vaultId: vaultId,
-                    title: title,
-                    date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-                };
-                setMemories([newMem, ...memories]);
-            };
+    const MILESTONES = [
+      { id:"m1", date:"2000-04-12", title:"Born",               label:"Origin",    emoji:"✦",  vaultId:null },
+      { id:"m2", date:"2006-09-05", title:"First Day of School",label:"Childhood", emoji:"🎒", vaultId:null },
+      { id:"m3", date:"2018-06-10", title:"High School Grad",   label:"Milestone", emoji:"🎓", vaultId:"family" },
+      { id:"m4", date:"2019-06-15", title:"Road Trip West",     label:"Adventure", emoji:"🚗", vaultId:"friends" },
+      { id:"m5", date:"2020-09-01", title:"Started College",    label:"Milestone", emoji:"📚", vaultId:null },
+      { id:"m6", date:"2021-02-14", title:"Met Jordan",         label:"Love",      emoji:"◈",  vaultId:"partner" },
+      { id:"m7", date:"2022-05-15", title:"Graduated College",  label:"Milestone", emoji:"🎓", vaultId:"family" },
+      { id:"m8", date:"2022-08-01", title:"Moved to Brooklyn",  label:"Home",      emoji:"🏙️", vaultId:null },
+      { id:"m9", date:"2022-09-12", title:"First Real Job",     label:"Career",    emoji:"💼", vaultId:null },
+      { id:"ma", date:"2022-08-15", title:"Moved In w/ Jordan", label:"Love",      emoji:"🏠", vaultId:"partner" },
+      { id:"mb", date:"2023-07-14", title:"Paris w/ Jordan",    label:"Adventure", emoji:"🗼", vaultId:"partner" },
+      { id:"mc", date:"2024-03-10", title:"Solo Lisbon",        label:"Adventure", emoji:"✈️", vaultId:"solo" },
+      { id:"md", date:"2024-11-01", title:"Promoted",           label:"Career",    emoji:"⬆️", vaultId:null },
+    ];
 
-            const VaultDetail = ({ vault }) => (
-                <div style={{ padding: '20px', animation: 'fadeIn 0.5s' }}>
-                    <button onClick={() => setView('home')} style={{ background: 'none', border: 'none', color: 'var(--gold)', fontSize: '1.2rem', marginBottom: '20px' }}>
-                        <i className="fa-solid fa-arrow-left"></i> Back
-                    </button>
-                    <h1 className="gold-text">{vault.name}</h1>
-                    <button className="btn-gold" onClick={() => addEntry(vault.id)}>+ Add New Memory</button>
-                    
-                    <div style={{ marginTop: '30px' }}>
-                        {memories.filter(m => m.vaultId === vault.id).map(m => (
-                            <div key={m.id} className="memory-item">
-                                <div style={{ fontWeight: 'bold' }}>{m.title}</div>
-                                <div style={{ fontSize: '0.8rem', opacity: 0.6 }}>{m.date}</div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            );
+    /* ══ SHARED ATOMS ══ */
+    function Lbl({ children }) {
+      return <div style={{ fontFamily:"'Raleway',sans-serif", fontSize:"10px", letterSpacing:"0.16em", textTransform:"uppercase", color:"var(--cream40)", marginBottom:"8px" }}>{children}</div>;
+    }
 
+    function FInput({ value, onChange, placeholder, type="text" }) {
+      return (
+        <input type={type} value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder}
+          style={{ width:"100%", background:"var(--bg2)", border:"1px solid var(--borderS)", borderRadius:"10px", padding:"12px 16px", color:"var(--cream)", fontSize:"13px", fontFamily:"'Raleway',sans-serif", fontWeight:300 }} />
+      );
+    }
+
+    /* ══ AUTH ══ */
+    function Auth({ onAuth }) {
+      const [screen, setScreen] = useState("land");
+      const [f, setF] = useState({ name:"", email:"", password:"", dob:"" });
+      const [loading, setLoading] = useState(false);
+      const [err, setErr] = useState("");
+
+      const submit = async () => {
+        if (!f.email || !f.password) { setErr("Please fill in all fields."); return; }
+        if (screen === "signup" && !f.name) { setErr("Enter your name."); return; }
+        setLoading(true); setErr("");
+        await new Promise(r => setTimeout(r, 1100));
+        setLoading(false);
+        onAuth({ name: f.name || "You", email: f.email, dob: f.dob });
+      };
+
+      if (screen === "land") return (
+        <div className="fi" style={{ minHeight:"100vh", background:"var(--bg0)", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"40px 24px", position:"relative", overflow:"hidden" }}>
+          <div style={{ position:"absolute", top:"-10%", left:"50%", transform:"translateX(-50%)", width:"700px", height:"500px", borderRadius:"50%", background:"radial-gradient(ellipse, rgba(196,92,42,0.35) 0%, rgba(212,116,58,0.18) 40%, transparent 70%)", filter:"blur(40px)", pointerEvents:"none" }} />
+          <div style={{ position:"absolute", bottom:"5%", left:"20%", width:"400px", height:"300px", borderRadius:"50%", background:"radial-gradient(ellipse, rgba(232,168,64,0.2) 0%, transparent 70%)", filter:"blur(50px)", pointerEvents:"none" }} />
+          <div className="fu" style={{ textAlign:"center", maxWidth:"540px", position:"relative" }}>
+            <div style={{ fontFamily:"'Raleway',sans-serif", fontSize:"11px", letterSpacing:"0.38em", color:"var(--sunset3)", textTransform:"uppercase", marginBottom:"22px" }}>Memory Archive</div>
+            <h1 style={{ fontFamily:"'Playfair Display',serif", fontSize:"clamp(72px,14vw,110px)", fontWeight:900, lineHeight:0.88, letterSpacing:"-0.03em", marginBottom:"30px" }}>
+              <span className="gold-text">VAULT</span>
+            </h1>
+            <p style={{ fontFamily:"'Raleway',sans-serif", fontSize:"16px", fontWeight:300, color:"var(--cream70)", lineHeight:1.85, marginBottom:"16px" }}>
+              Create a timeline of your life<br/>through your camera roll.
+            </p>
+            <p style={{ fontFamily:"'Playfair Display',serif", fontSize:"15px", fontStyle:"italic", color:"var(--sunset4)", marginBottom:"52px" }}>
+              Your memories, beautifully preserved.
+            </p>
+            <div style={{ display:"flex", gap:"14px", justifyContent:"center", flexWrap:"wrap" }}>
+              <button onClick={() => setScreen("signup")}
+                style={{ background:"linear-gradient(135deg, var(--sunset1), var(--sunset3))", color:"var(--cream)", border:"none", borderRadius:"40px", padding:"16px 40px", fontFamily:"'Raleway',sans-serif", fontSize:"13px", fontWeight:600, letterSpacing:"0.14em", textTransform:"uppercase", boxShadow:"0 8px 32px rgba(196,92,42,0.45)", transition:"all 0.25s" }}
+                onMouseEnter={e => e.currentTarget.style.boxShadow="0 12px 40px rgba(196,92,42,0.6)"}
+                onMouseLeave={e => e.currentTarget.style.boxShadow="0 8px 32px rgba(196,92,42,0.45)"}>
+                Create Your Vault
+              </button>
+              <button onClick={() => setScreen("login")}
+                style={{ background:"transparent", color:"var(--cream70)", border:"1px solid rgba(245,237,224,0.25)", borderRadius:"40px", padding:"16px 40px", fontFamily:"'Raleway',sans-serif", fontSize:"13px", fontWeight:400, letterSpacing:"0.14em", textTransform:"uppercase", transition:"all 0.25s" }}
+                onMouseEnter={e => { e.currentTarget.style.color="var(--cream)"; e.currentTarget.style.borderColor="rgba(245,237,224,0.5)"; }}
+                onMouseLeave={e => { e.currentTarget.style.color="var(--cream70)"; e.currentTarget.style.borderColor="rgba(245,237,224,0.25)"; }}>
+                Sign In
+              </button>
+            </div>
+          </div>
+          <div style={{ position:"absolute", bottom:0, left:"50%", transform:"translateX(-50%)", display:"flex", flexDirection:"column", alignItems:"center", gap:"8px", paddingBottom:"20px" }}>
+            <div style={{ fontFamily:"'Raleway',sans-serif", fontSize:"10px", letterSpacing:"0.2em", color:"var(--cream40)", textTransform:"uppercase" }}>Scroll your story</div>
+            <div style={{ width:"1px", height:"60px", background:"linear-gradient(to bottom, var(--gold), transparent)" }} />
+          </div>
+        </div>
+      );
+
+      return (
+        <div className="fi" style={{ minHeight:"100vh", background:"var(--bg0)", display:"flex", alignItems:"center", justifyContent:"center", padding:"24px", position:"relative" }}>
+          <div style={{ position:"absolute", top:0, left:0, right:0, height:"50%", background:"radial-gradient(ellipse at 50% 0%, rgba(196,92,42,0.2) 0%, transparent 70%)", pointerEvents:"none" }} />
+          <div className="si" style={{ width:"100%", maxWidth:"420px", position:"relative" }}>
+            <div style={{ textAlign:"center", marginBottom:"40px" }}>
+              <div style={{ fontFamily:"'Playfair Display',serif", fontSize:"42px", fontWeight:900 }}>
+                <span className="gold-text">VAULT</span>
+              </div>
+              <div style={{ fontFamily:"'Raleway',sans-serif", fontSize:"13px", color:"var(--cream40)", marginTop:"6px", fontWeight:300 }}>
+                {screen === "signup" ? "Create your memory archive" : "Welcome back"}
+              </div>
+            </div>
+            <div style={{ display:"flex", flexDirection:"column", gap:"14px" }}>
+              {screen === "signup" && <div><Lbl>Your Name</Lbl><FInput value={f.name} onChange={v => setF({...f,name:v})} placeholder="First name" /></div>}
+              <div><Lbl>Email</Lbl><FInput value={f.email} onChange={v => setF({...f,email:v})} placeholder="your@email.com" type="email" /></div>
+              <div><Lbl>Password</Lbl><FInput value={f.password} onChange={v => setF({...f,password:v})} placeholder="Password" type="password" /></div>
+              {screen === "signup" && <div><Lbl>Date of Birth</Lbl><FInput value={f.dob} onChange={v => setF({...f,dob:v})} type="date" /></div>}
+              {err && <div style={{ fontSize:"13px", color:"#F08060", fontFamily:"'Raleway',sans-serif", fontWeight:300 }}>{err}</div>}
+              <button onClick={submit} disabled={loading}
+                style={{ marginTop:"6px", background:"linear-gradient(135deg, var(--sunset1), var(--sunset3))", color:"var(--cream)", border:"none", borderRadius:"10px", padding:"15px", fontFamily:"'Raleway',sans-serif", fontSize:"13px", fontWeight:600, letterSpacing:"0.12em", textTransform:"uppercase", opacity:loading?0.7:1, display:"flex", alignItems:"center", justifyContent:"center", gap:"10px", boxShadow:"0 4px 20px rgba(196,92,42,0.4)", cursor:loading?"not-allowed":"pointer" }}>
+                {loading
+                  ? <><div style={{ width:"14px", height:"14px", border:"2px solid var(--cream)", borderTopColor:"transparent", borderRadius:"50%", animation:"spin 0.7s linear infinite" }} />Processing...</>
+                  : screen === "signup" ? "Create Vault →" : "Enter →"}
+              </button>
+            </div>
+            <div style={{ textAlign:"center", marginTop:"24px", fontFamily:"'Raleway',sans-serif", fontSize:"13px", color:"var(--cream40)", fontWeight:300 }}>
+              {screen === "signup" ? "Already have a vault?" : "New to Vault?"}{" "}
+              <button onClick={() => setScreen(screen === "signup" ? "login" : "signup")} style={{ color:"var(--sunset4)", fontSize:"13px", fontFamily:"'Raleway',sans-serif", fontWeight:500, textDecoration:"underline" }}>
+                {screen === "signup" ? "Sign in" : "Create one"}
+              </button>
+            </div>
+            <div style={{ textAlign:"center", marginTop:"14px" }}>
+              <button onClick={() => setScreen("land")} style={{ color:"var(--cream40)", fontSize:"12px", fontFamily:"'Raleway',sans-serif", fontWeight:300 }}>← Back</button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    /* ══ GOLDEN THREAD ══ */
+    function GoldenThread({ milestones, vaults, onVaultOpen }) {
+      const [activeI, setActiveI] = useState(0);
+      const itemRefs = useRef({});
+      const sorted = [...milestones].sort((a,b) => new Date(a.date) - new Date(b.date));
+
+      useEffect(() => {
+        const obs = new IntersectionObserver(entries => {
+          entries.forEach(e => { if (e.isIntersecting) setActiveI(+e.target.dataset.i); });
+        }, { threshold: 0.6, rootMargin:"-35% 0px -35% 0px" });
+        Object.values(itemRefs.current).forEach(el => el && obs.observe(el));
+        return () => obs.disconnect();
+      }, [sorted.length]);
+
+      return (
+        <div style={{ position:"relative", padding:"60px 0 100px" }}>
+          <div className="thread-line" />
+          <div className="thread-glow" />
+          {sorted.map((ev, i) => {
+            const vault = ev.vaultId ? vaults.find(v => v.id === ev.vaultId) : null;
+            const isLeft = i % 2 === 0;
+            const isActive = activeI === i;
             return (
-                <div style={{ maxWidth: '500px', margin: '0 auto', minHeight: '100vh' }}>
-                    <GlobalStyles />
-                    
-                    {view === 'home' ? (
-                        <div style={{ padding: '40px 20px' }}>
-                            <header style={{ marginBottom: '40px' }}>
-                                <h1 className="gold-text" style={{ fontSize: '2.5rem', margin: 0 }}>VAULT</h1>
-                                <p style={{ opacity: 0.5, fontSize: '0.9rem' }}>YOUR DIGITAL LEGACY</p>
-                            </header>
-
-                            <h3 style={{ marginBottom: '20px', letterSpacing: '2px', fontSize: '0.8rem', opacity: 0.7 }}>SELECT ARCHIVE</h3>
-                            
-                            {INIT_VAULTS.map(vault => (
-                                <div key={vault.id} className="vault-card" onClick={() => { setSelectedVault(vault); setView('vault'); }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                                        <div style={{ background: vault.color, width: '40px', height: '40px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                            <i className={`fa-solid ${vault.icon}`} style={{ color: 'white' }}></i>
-                                        </div>
-                                        <div>
-                                            <div style={{ fontWeight: '700', fontSize: '1.1rem' }}>{vault.name}</div>
-                                            <div style={{ fontSize: '0.8rem', opacity: 0.5 }}>
-                                                {memories.filter(m => m.vaultId === vault.id).length} Entries
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    ) : (
-                        <VaultDetail vault={selectedVault} />
-                    )}
+              <div key={ev.id} data-i={i} ref={el => itemRefs.current[i] = el}
+                style={{ display:"flex", alignItems:"center", marginBottom:"56px", opacity:isActive?1:0.45, transition:"opacity 0.4s ease", position:"relative" }}>
+                <div style={{ flex:1, paddingRight:"50px", textAlign:"right" }}>
+                  {isLeft && <ThreadCard ev={ev} vault={vault} dir="right" onVaultOpen={onVaultOpen} />}
                 </div>
+                <div className={`thread-dot ${isActive ? "active" : ""}`} />
+                <div style={{ flex:1, paddingLeft:"50px" }}>
+                  {!isLeft && <ThreadCard ev={ev} vault={vault} dir="left" onVaultOpen={onVaultOpen} />}
+                </div>
+              </div>
             );
-        }
+          })}
+        </div>
+      );
+    }
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
-    </script>
+    function ThreadCard({ ev, vault, dir, onVaultOpen }) {
+      const [h, setH] = useState(false);
+      const c = vault ? vault.color : "var(--gold)";
+      return (
+        <div onMouseEnter={() => setH(true)} onMouseLeave={() => setH(false)}
+          onClick={() => vault && onVaultOpen(vault)}
+          style={{ display:"inline-block", maxWidth:"300px", textAlign:dir, background:h?"rgba(196,92,42,0.1)":"rgba(245,237,224,0.03)", border:`1px solid ${h?"rgba(196,92,42,0.35)":"var(--borderS)"}`, borderRadius:"14px", padding:"18px 22px", cursor:vault?"pointer":"default", transition:"all 0.3s", transform:h?`translateX(${dir==="right"?"-":""}5px)`:"none" }}>
+          <div style={{ fontFamily:"'Raleway',sans-serif", fontSize:"10px", letterSpacing:"0.18em", color:"var(--cream40)", textTransform:"uppercase", marginBottom:"5px" }}>{fmtShort(ev.date)}</div>
+          <div style={{ display:"flex", alignItems:"center", gap:"8px", justifyContent:dir==="right"?"flex-end":"flex-start", marginBottom:"4px" }}>
+            {dir === "left" && <span style={{ fontSize:"18px" }}>{ev.emoji}</span>}
+            <div style={{ fontFamily:"'Playfair Display',serif", fontSize:"18px", fontWeight:700, color:"var(--cream)" }}>{ev.title}</div>
+            {dir === "right" && <span style={{ fontSize:"18px" }}>{ev.emoji}</span>}
+          </div>
+          <div style={{ fontFamily:"'Raleway',sans-serif", fontSize:"10px", letterSpacing:"0.14em", color:c, textTransform:"uppercase", fontWeight:500 }}>{ev.label}</div>
+          {vault && (
+            <div style={{ marginTop:"10px", display:"inline-flex", alignItems:"center", gap:"6px", background:"rgba(196,92,42,0.15)", border:`1px solid ${vault.color}55`, borderRadius:"20px", padding:"5px 12px", fontSize:"11px", color:"var(--cream70)", fontFamily:"'Raleway',sans-serif" }}>
+              <span style={{ color:vault.color }}>{vault.icon}</span>{vault.name} vault →
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    /* ══ AI IMPORT ══ */
+    function AIImport({ vault, onDone, onClose }) {
+      const [step, setStep] = useState("cfg");
+      const [cfg, setCfg] = useState({ label:"", from:"", to:"", prompt:"" });
+      const [photos, setPhotos] = useState([]);
+      const [results, setResults] = useState([]);
+      const [picked, setPicked] = useState(new Set());
+      const [prog, setProg] = useState(0);
+      const dropRef = useRef();
+      const fileRef = useRef();
+
+      const loadFiles = files => {
+        const imgs = []; let done = 0;
+        const valid = Array.from(files).filter(f => f.type.startsWith("image/"));
+        if (!valid.length) return;
+        valid.forEach(f => {
+          const r = new FileReader();
+          r.onload = e => {
+            imgs.push({ id:uid(), name:f.name, src:e.target.result, date:new Date(f.lastModified).toISOString().split("T")[0] });
+            done++;
+            if (done === valid.length) setPhotos(p => [...p, ...imgs]);
+          };
+          r.readAsDataURL(f);
+        });
+      };
+
+      const scan = async () => {
+        if (!photos.length) return;
+        setStep("scanning"); setProg(0);
+        const iv = setInterval(() => setProg(p => { const n = p + Math.random()*9; if(n>=95) clearInterval(iv); return Math.min(n,95); }), 220);
+        const r = await runAIAnalysis(photos);
+        clearInterval(iv); setProg(100);
+        setTimeout(() => { setResults(r); setPicked(new Set(r.filter(x=>x.aiPick).map(x=>x.id))); setStep("review"); }, 400);
+      };
+
+      const finish = () => {
+        const chosen = results.filter(r => picked.has(r.id));
+        onDone(chosen.map(p => ({ id:uid(), vaultId:vault.id, date:p.date||cfg.from||new Date().toISOString().split("T")[0], title:p.name.replace(/\.[^/.]+$/,"").replace(/[-_]/g," "), desc:"Added via AI import.", src:p.src, emoji:"📷" })));
+      };
+
+      const STEPS = ["cfg","scanning","review"];
+
+      return (
+        <div className="fi" onClick={onClose} style={{ position:"fixed", inset:0, background:"rgba(10,5,2,0.92)", backdropFilter:"blur(16px)", zIndex:300, display:"flex", alignItems:"center", justifyContent:"center", padding:"20px" }}>
+          <div className="si" onClick={e => e.stopPropagation()} style={{ background:"var(--bg2)", border:"1px solid var(--border)", borderRadius:"24px", width:"100%", maxWidth:"640px", maxHeight:"88vh", overflow:"hidden", display:"flex", flexDirection:"column" }}>
+            <div style={{ background:`linear-gradient(135deg, ${vault.color}30, transparent)`, padding:"26px 30px 20px", borderBottom:"1px solid var(--borderS)" }}>
+              <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start" }}>
+                <div>
+                  <div style={{ fontFamily:"'Raleway',sans-serif", fontSize:"10px", letterSpacing:"0.2em", color:vault.color, textTransform:"uppercase", marginBottom:"5px" }}>AI Photo Import</div>
+                  <div style={{ fontFamily:"'Playfair Display',serif", fontSize:"22px", fontWeight:700, color:"var(--cream)" }}>{vault.icon} &nbsp;{vault.name} Vault</div>
+                </div>
+                <button onClick={onClose} style={{ color:"var(--cream40)", fontSize:"20px", lineHeight:1, padding:"4px" }}>✕</button>
+              </div>
+              <div style={{ display:"flex", marginTop:"20px" }}>
+                {["Configure","Scanning","Review"].map((s, i) => (
+                  <div key={s} style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", gap:"5px" }}>
+                    <div style={{ width:"100%", height:"2px", background:i<=STEPS.indexOf(step)?"var(--sunset3)":"var(--borderS)", transition:"background 0.4s" }} />
+                    <div style={{ fontFamily:"'Raleway',sans-serif", fontSize:"10px", letterSpacing:"0.1em", color:i<=STEPS.indexOf(step)?"var(--sunset4)":"var(--cream40)", textTransform:"uppercase" }}>{s}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div style={{ flex:1, overflowY:"auto", padding:"26px 30px" }}>
+              {step === "cfg" && (
+                <div style={{ display:"flex", flexDirection:"column", gap:"18px" }}>
+                  <p style={{ fontFamily:"'Raleway',sans-serif", fontSize:"14px", color:"var(--cream70)", fontWeight:300, lineHeight:1.75 }}>
+                    Tell the AI what to look for. It will scan your photos and pre-select the best matches — you make the final call.
+                  </p>
+                  <div><Lbl>Vault Theme / Name</Lbl><FInput value={cfg.label} onChange={v => setCfg({...cfg,label:v})} placeholder="e.g. College Years, Europe Trip 2023" /></div>
+                  <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"12px" }}>
+                    <div><Lbl>Date From</Lbl><FInput type="date" value={cfg.from} onChange={v => setCfg({...cfg,from:v})} /></div>
+                    <div><Lbl>Date To</Lbl><FInput type="date" value={cfg.to} onChange={v => setCfg({...cfg,to:v})} /></div>
+                  </div>
+                  <div>
+                    <Lbl>What should the AI look for?</Lbl>
+                    <textarea value={cfg.prompt} onChange={e => setCfg({...cfg,prompt:e.target.value})} placeholder="e.g. Group photos, outdoor adventures, celebrations, moments with specific people..."
+                      style={{ width:"100%", background:"var(--bg1)", border:"1px solid var(--borderS)", borderRadius:"10px", padding:"12px 14px", color:"var(--cream)", fontSize:"13px", fontFamily:"'Raleway',sans-serif", fontWeight:300, resize:"vertical", minHeight:"80px", lineHeight:1.6 }} />
+                  </div>
+                  <div ref={dropRef}
+                    onDragOver={e => { e.preventDefault(); dropRef.current.style.borderColor="var(--sunset3)"; }}
+                    onDragLeave={() => dropRef.current.style.borderColor="var(--borderS)"}
+                    onDrop={e => { e.preventDefault(); dropRef.current.style.borderColor="var(--borderS)"; loadFiles(e.dataTransfer.files); }}
+                    onClick={() => fileRef.current.click()}
+                    style={{ border:"2px dashed var(--borderS)", borderRadius:"14px", padding:"32px 20px", textAlign:"center", cursor:"pointer", transition:"all 0.2s" }}>
+                    <input ref={fileRef} type="file" accept="image/*" multiple style={{ display:"none" }} onChange={e => loadFiles(e.target.files)} />
+                    <div style={{ fontSize:"30px", marginBottom:"12px" }}>📸</div>
+                    <div style={{ fontFamily:"'Raleway',sans-serif", fontSize:"13px", color:"var(--cream40)", fontWeight:300, lineHeight:1.65 }}>
+                      Drop camera roll photos here or <span style={{ color:"var(--sunset4)" }}>browse files</span><br/>
+                      <span style={{ fontSize:"11px" }}>Photos keep their original date &amp; location metadata</span>
+                    </div>
+                    {photos.length > 0 && <div style={{ marginTop:"12px", fontFamily:"'Raleway',sans-serif", fontSize:"13px", color:"var(--sunset3)", fontWeight:500 }}>✓ {photos.length} photo{photos.length>1?"s":""} loaded</div>}
+                  </div>
+                  <button onClick={scan} disabled={!photos.length}
+                    style={{ background:photos.length?"linear-gradient(135deg, var(--sunset1), var(--sunset3))":"var(--bg3)", color:photos.length?"var(--cream)":"var(--cream40)", border:"none", borderRadius:"10px", padding:"15px", fontFamily:"'Raleway',sans-serif", fontSize:"13px", fontWeight:600, letterSpacing:"0.12em", textTransform:"uppercase", boxShadow:photos.length?"0 4px 20px rgba(196,92,42,0.4)":"none", cursor:photos.length?"pointer":"not-allowed" }}>
+                    {photos.length ? `Analyze ${photos.length} Photos with AI →` : "Add Photos First"}
+                  </button>
+                </div>
+              )}
+
+              {step === "scanning" && (
+                <div style={{ textAlign:"center", padding:"50px 20px" }}>
+                  <div style={{ fontSize:"44px", marginBottom:"24px", display:"inline-block", animation:"spin 2.5s linear infinite" }}>✦</div>
+                  <div style={{ fontFamily:"'Playfair Display',serif", fontSize:"24px", fontWeight:700, color:"var(--cream)", marginBottom:"12px" }}>AI is scanning your photos…</div>
+                  <div style={{ fontFamily:"'Raleway',sans-serif", fontSize:"13px", color:"var(--cream40)", fontWeight:300, marginBottom:"36px", lineHeight:1.75 }}>
+                    Analyzing dates, faces, locations &amp;<br/>identifying emotionally significant moments.
+                  </div>
+                  <div style={{ background:"var(--bg1)", borderRadius:"40px", height:"4px", overflow:"hidden", maxWidth:"340px", margin:"0 auto" }}>
+                    <div style={{ height:"100%", width:`${prog}%`, background:"linear-gradient(90deg,var(--sunset1),var(--gold2))", borderRadius:"40px", transition:"width 0.3s ease", boxShadow:"0 0 12px var(--sunset3)" }} />
+                  </div>
+                  <div style={{ fontFamily:"'Raleway',sans-serif", fontSize:"11px", color:"var(--cream40)", marginTop:"12px" }}>{Math.round(prog)}% complete</div>
+                </div>
+              )}
+
+              {step === "review" && (
+                <div>
+                  <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:"16px" }}>
+                    <div>
+                      <div style={{ fontFamily:"'Playfair Display',serif", fontSize:"18px", fontWeight:700, color:"var(--cream)" }}>AI picked {results.filter(r=>r.aiPick).length} of {results.length}</div>
+                      <div style={{ fontFamily:"'Raleway',sans-serif", fontSize:"12px", color:"var(--cream40)", fontWeight:300, marginTop:"3px" }}>Toggle to adjust. You have the final say.</div>
+                    </div>
+                    <div style={{ display:"flex", gap:"8px" }}>
+                      <button onClick={() => setPicked(new Set(results.map(r=>r.id)))} style={{ background:"var(--bg3)", border:"1px solid var(--borderS)", color:"var(--cream70)", borderRadius:"8px", padding:"5px 12px", fontSize:"11px", fontFamily:"'Raleway',sans-serif" }}>All</button>
+                      <button onClick={() => setPicked(new Set())} style={{ background:"var(--bg3)", border:"1px solid var(--borderS)", color:"var(--cream70)", borderRadius:"8px", padding:"5px 12px", fontSize:"11px", fontFamily:"'Raleway',sans-serif" }}>None</button>
+                    </div>
+                  </div>
+                  <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:"8px", marginBottom:"22px" }}>
+                    {results.map(ph => {
+                      const sel = picked.has(ph.id);
+                      return (
+                        <div key={ph.id} onClick={() => { const s = new Set(picked); sel ? s.delete(ph.id) : s.add(ph.id); setPicked(s); }}
+                          style={{ position:"relative", aspectRatio:"1", borderRadius:"10px", overflow:"hidden", cursor:"pointer", border:`2px solid ${sel?"var(--gold)":"transparent"}`, transition:"all 0.2s" }}>
+                          <img src={ph.src} alt="" style={{ width:"100%", height:"100%", objectFit:"cover", opacity:sel?1:0.4, transition:"opacity 0.2s" }} />
+                          {sel && <div style={{ position:"absolute", top:"6px", right:"6px", width:"20px", height:"20px", borderRadius:"50%", background:"var(--gold)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:"10px", color:"var(--bg0)", fontWeight:700 }}>✓</div>}
+                          <div style={{ position:"absolute", bottom:0, left:0, right:0, background:"linear-gradient(transparent,rgba(0,0,0,0.78))", padding:"16px 7px 7px" }}>
+                            <div style={{ fontFamily:"'Raleway',sans-serif", fontSize:"10px", color:"rgba(255,255,255,0.7)", fontWeight:300 }}>{ph.aiReason}</div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <button onClick={finish} style={{ width:"100%", background:"linear-gradient(135deg,var(--sunset1),var(--sunset3))", color:"var(--cream)", border:"none", borderRadius:"10px", padding:"15px", fontFamily:"'Raleway',sans-serif", fontSize:"13px", fontWeight:600, letterSpacing:"0.12em", textTransform:"uppercase", boxShadow:"0 4px 20px rgba(196,92,42,0.4)" }}>
+                    Add {picked.size} Photo{picked.size!==1?"s":""} to Vault →
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    /* ══ SLIDESHOW ══ */
+    function Slideshow({ mems, vault, onClose }) {
+      const [i, setI] = useState(0);
+      const [vis, setVis] = useState(true);
+      const [play, setPlay] = useState(true);
+      const timerRef = useRef();
+
+      const go = useCallback(dir => {
+        setVis(false);
+        setTimeout(() => { setI(p => (p + dir + mems.length) % mems.length); setVis(true); }, 280);
+      }, [mems.length]);
+
+      useEffect(() => {
+        if (play) { timerRef.current = setInterval(() => go(1), 3800); }
+        return () => clearInterval(timerRef.current);
+      }, [play, go]);
+
+      useEffect(() => {
+        const fn = e => { if(e.key==="Escape")onClose(); if(e.key==="ArrowRight")go(1); if(e.key==="ArrowLeft")go(-1); };
+        window.addEventListener("keydown", fn);
+        return () => window.removeEventListener("keydown", fn);
+      }, [go, onClose]);
+
+      const m = mems[i]; if (!m) return null;
+
+      return (
+        <div className="fi" style={{ position:"fixed", inset:0, background:"#000", zIndex:400, display:"flex", flexDirection:"column" }}>
+          <div style={{ flex:1, position:"relative", overflow:"hidden" }}>
+            {m.src
+              ? <img src={m.src} style={{ width:"100%", height:"100%", objectFit:"contain", opacity:vis?1:0, transition:"opacity 0.28s" }} alt="" />
+              : <div style={{ width:"100%", height:"100%", display:"flex", alignItems:"center", justifyContent:"center", background:"var(--bg0)", opacity:vis?1:0, transition:"opacity 0.28s", fontSize:"90px" }}>{m.emoji}</div>
+            }
+            <div style={{ position:"absolute", inset:0, background:"linear-gradient(to top, rgba(15,5,0,0.85) 0%, transparent 45%)", pointerEvents:"none" }} />
+            <div style={{ position:"absolute", bottom:0, left:0, right:0, padding:"40px 52px", opacity:vis?1:0, transition:"opacity 0.28s" }}>
+              <div style={{ fontFamily:"'Raleway',sans-serif", fontSize:"11px", letterSpacing:"0.2em", color:"var(--sunset4)", textTransform:"uppercase", marginBottom:"8px" }}>{fmtShort(m.date)}</div>
+              <div style={{ fontFamily:"'Playfair Display',serif", fontSize:"clamp(24px,4vw,44px)", fontWeight:900, color:"var(--cream)", marginBottom:"10px", lineHeight:1.05 }}>{m.title}</div>
+              <div style={{ fontFamily:"'Playfair Display',serif", fontSize:"16px", fontStyle:"italic", color:"var(--cream70)", maxWidth:"480px", lineHeight:1.75 }}>"{m.desc}"</div>
+            </div>
+            <button onClick={() => go(-1)} style={{ position:"absolute", left:"20px", top:"50%", transform:"translateY(-50%)", background:"rgba(196,92,42,0.2)", border:"1px solid rgba(196,92,42,0.3)", color:"var(--cream)", borderRadius:"50%", width:"46px", height:"46px", fontSize:"20px" }}>‹</button>
+            <button onClick={() => go(1)}  style={{ position:"absolute", right:"20px", top:"50%", transform:"translateY(-50%)", background:"rgba(196,92,42,0.2)", border:"1px solid rgba(196,92,42,0.3)", color:"var(--cream)", borderRadius:"50%", width:"46px", height:"46px", fontSize:"20px" }}>›</button>
+          </div>
+          <div style={{ display:"flex", gap:"3px", padding:"10px 20px", background:"rgba(0,0,0,0.7)" }}>
+            {mems.map((_, j) => <div key={j} onClick={() => setI(j)} style={{ flex:1, height:"2px", background:j===i?"var(--gold)":"rgba(245,237,224,0.2)", borderRadius:"2px", cursor:"pointer", transition:"background 0.2s" }} />)}
+          </div>
+          <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"10px 24px 18px", background:"rgba(0,0,0,0.7)" }}>
+            <div style={{ fontFamily:"'Raleway',sans-serif", fontSize:"12px", color:"var(--cream40)", fontWeight:300 }}>{i+1} / {mems.length}</div>
+            <div style={{ display:"flex", gap:"10px" }}>
+              <button onClick={() => setPlay(!play)} style={{ background:"rgba(196,92,42,0.2)", border:"1px solid rgba(196,92,42,0.3)", color:"var(--cream)", borderRadius:"8px", padding:"8px 18px", fontFamily:"'Raleway',sans-serif", fontSize:"12px", letterSpacing:"0.1em" }}>{play ? "⏸ Pause" : "▶ Play"}</button>
+              <button onClick={onClose} style={{ background:"transparent", border:"1px solid var(--borderS)", color:"var(--cream40)", borderRadius:"8px", padding:"8px 18px", fontFamily:"'Raleway',sans-serif", fontSize:"12px", letterSpacing:"0.1em" }}>✕ Close</button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    /* ══ COLLAGE ══ */
+    function Collage({ mems, vault, onClose }) {
+      const items = mems.slice(0, 6);
+      return (
+        <div className="fi" onClick={onClose} style={{ position:"fixed", inset:0, background:"rgba(10,4,0,0.94)", backdropFilter:"blur(18px)", zIndex:400, display:"flex", alignItems:"center", justifyContent:"center", padding:"24px" }}>
+          <div className="si" onClick={e => e.stopPropagation()} style={{ width:"100%", maxWidth:"780px" }}>
+            <div style={{ textAlign:"center", marginBottom:"24px" }}>
+              <div style={{ fontFamily:"'Raleway',sans-serif", fontSize:"10px", letterSpacing:"0.24em", color:"var(--sunset3)", textTransform:"uppercase", marginBottom:"8px" }}>{vault.name} Vault</div>
+              <div style={{ fontFamily:"'Playfair Display',serif", fontSize:"32px", fontWeight:900, color:"var(--cream)" }}>Memory Collage</div>
+            </div>
+            <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gridTemplateRows:"repeat(2,190px)", gap:"6px", borderRadius:"18px", overflow:"hidden" }}>
+              {items.map((m, idx) => {
+                const big = idx === 0;
+                return (
+                  <div key={m.id} style={{ gridColumn:big?"span 2":"span 1", gridRow:big?"span 2":"span 1", position:"relative", overflow:"hidden", background:"var(--bg2)" }}>
+                    {m.src
+                      ? <img src={m.src} alt="" style={{ width:"100%", height:"100%", objectFit:"cover" }} />
+                      : <div style={{ width:"100%", height:"100%", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", background:`radial-gradient(ellipse, ${vault.color}30, var(--bg2))` }}>
+                          <div style={{ fontSize:big?"52px":"28px" }}>{m.emoji}</div>
+                          <div style={{ fontFamily:"'Playfair Display',serif", fontSize:big?"15px":"11px", color:"var(--cream70)", textAlign:"center", padding:"0 12px", marginTop:"8px", fontWeight:700 }}>{m.title}</div>
+                        </div>
+                    }
+                    <div style={{ position:"absolute", inset:0, background:"linear-gradient(to top,rgba(0,0,0,0.65) 0%,transparent 50%)", opacity:0, transition:"opacity 0.2s" }}
+                      onMouseEnter={e => e.currentTarget.style.opacity="1"}
+                      onMouseLeave={e => e.currentTarget.style.opacity="0"}>
+                      <div style={{ position:"absolute", bottom:0, left:0, right:0, padding:"14px 12px" }}>
+                        <div style={{ fontFamily:"'Playfair Display',serif", fontSize:big?"14px":"12px", fontWeight:700, color:"#fff" }}>{m.title}</div>
+                        <div style={{ fontFamily:"'Raleway',sans-serif", fontSize:"10px", color:"rgba(255,255,255,0.6)", marginTop:"2px" }}>{fmtShort(m.date)}</div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <div style={{ display:"flex", justifyContent:"center", marginTop:"20px" }}>
+              <button onClick={onClose} style={{ background:"transparent", border:"1px solid var(--borderS)", color:"var(--cream40)", borderRadius:"10px", padding:"12px 24px", fontFamily:"'Raleway',sans-serif", fontSize:"12px", fontWeight:600, letterSpacing:"0.12em", textTransform:"uppercase" }}>Close</button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    /* ══ MEMORY ROW ══ */
+    function MemRow({ m, last, vc }) {
+      const [h, setH] = useState(false);
+      return (
+        <div style={{ display:"flex", alignItems:"stretch" }} onMouseEnter={() => setH(true)} onMouseLeave={() => setH(false)}>
+          <div style={{ width:"106px", flexShrink:0, paddingTop:"20px", paddingRight:"18px", textAlign:"right" }}>
+            <div style={{ fontFamily:"'Raleway',sans-serif", fontSize:"11px", color:"var(--cream40)", fontWeight:300, lineHeight:1.5 }}>
+              {new Date(m.date).toLocaleDateString("en-US",{month:"short",day:"numeric"})}<br/><span style={{ fontSize:"10px", opacity:0.6 }}>{getYr(m.date)}</span>
+            </div>
+          </div>
+          <div style={{ display:"flex", flexDirection:"column", alignItems:"center", width:"18px", flexShrink:0 }}>
+            <div style={{ width:"8px", height:"8px", borderRadius:"50%", background:m.src?vc:"transparent", border:`1.5px solid ${vc}`, marginTop:"24px", flexShrink:0, boxShadow:`0 0 0 3px var(--bg1)`, zIndex:1, transition:"all 0.2s" }} />
+            {!last && <div style={{ flex:1, width:"1px", background:"var(--borderS)", marginTop:"4px" }} />}
+          </div>
+          <div style={{ flex:1, marginLeft:"16px", marginBottom:"10px", marginTop:"10px", background:h?"rgba(196,92,42,0.08)":"rgba(245,237,224,0.02)", border:`1px solid ${h?"rgba(196,92,42,0.25)":"var(--borderS)"}`, borderRadius:"12px", padding:"14px 18px", transition:"all 0.25s", transform:h?"translateX(4px)":"none", display:"flex", gap:"14px", alignItems:"flex-start" }}>
+            {m.src && <img src={m.src} alt="" style={{ width:"54px", height:"54px", borderRadius:"8px", objectFit:"cover", flexShrink:0 }} />}
+            <div style={{ flex:1 }}>
+              <div style={{ fontFamily:"'Playfair Display',serif", fontSize:"17px", fontWeight:700, color:"var(--cream)", marginBottom:"3px" }}>{m.title}</div>
+              <div style={{ fontFamily:"'Raleway',sans-serif", fontSize:"13px", color:"var(--cream40)", fontWeight:300, lineHeight:1.6 }}>{m.desc}</div>
+            </div>
+            {!m.src && <div style={{ fontSize:"20px", opacity:0.5 }}>{m.emoji}</div>}
+          </div>
+        </div>
+      );
+    }
+
+    /* ══ VAULT DETAIL ══ */
+    function VaultView({ vault, mems, onBack, onAdd, onImportAI }) {
+      const [showSS, setShowSS] = useState(false);
+      const [showColl, setShowColl] = useState(false);
+      const [addOpen, setAddOpen] = useState(false);
+      const [nm, setNm] = useState({ title:"", date:"", desc:"" });
+      const [imgPrev, setImgPrev] = useState(null);
+      const fileRef = useRef();
+
+      const byYear = {};
+      [...mems].sort((a,b) => new Date(a.date)-new Date(b.date)).forEach(m => { const y=getYr(m.date); if(!byYear[y])byYear[y]=[]; byYear[y].push(m); });
+      const years = Object.keys(byYear).sort((a,b) => +a-+b);
+
+      const saveAdd = () => {
+        if (!nm.title || !nm.date) return;
+        onAdd({ id:uid(), vaultId:vault.id, ...nm, src:imgPrev, emoji:"📷" });
+        setAddOpen(false); setNm({title:"",date:"",desc:""}); setImgPrev(null);
+      };
+
+      return (
+        <div className="fi" style={{ minHeight:"100vh" }}>
+          <div style={{ padding:"40px 52px 32px", borderBottom:"1px solid var(--borderS)", position:"sticky", top:0, zIndex:10, backdropFilter:"blur(20px)", background:`radial-gradient(ellipse at 30% 50%, ${vault.color}20 0%, transparent 60%), rgba(26,15,8,0.93)` }}>
+            <button onClick={onBack} style={{ color:"var(--cream40)", fontFamily:"'Raleway',sans-serif", fontSize:"11px", letterSpacing:"0.18em", textTransform:"uppercase", marginBottom:"22px", display:"flex", alignItems:"center", gap:"8px", transition:"color 0.2s" }}
+              onMouseEnter={e => e.target.style.color="var(--cream70)"}
+              onMouseLeave={e => e.target.style.color="var(--cream40)"}>
+              ← My Vaults
+            </button>
+            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-end", flexWrap:"wrap", gap:"16px" }}>
+              <div>
+                <div style={{ fontFamily:"'Raleway',sans-serif", fontSize:"10px", letterSpacing:"0.24em", color:vault.color, textTransform:"uppercase", marginBottom:"8px" }}>{vault.icon} Vault</div>
+                <div style={{ fontFamily:"'Playfair Display',serif", fontSize:"clamp(36px,5vw,52px)", fontWeight:900, color:"var(--cream)", lineHeight:1, letterSpacing:"-0.02em" }}>{vault.name}</div>
+                <div style={{ fontFamily:"'Raleway',sans-serif", fontSize:"13px", color:"var(--cream40)", fontWeight:300, marginTop:"6px" }}>{mems.length} memories</div>
+              </div>
+              <div style={{ display:"flex", gap:"10px", flexWrap:"wrap" }}>
+                {[["🖼 Collage", () => setShowColl(true)], ["▶ Slideshow", () => setShowSS(true)], ["✦ AI Import", onImportAI, true], ["+ Add", () => setAddOpen(true)]].map(([lbl, fn, gold]) => (
+                  <button key={lbl} onClick={fn}
+                    style={{ background:gold?"linear-gradient(135deg,var(--sunset1),var(--sunset3))":"var(--cream10)", color:gold?"var(--cream)":"var(--cream70)", border:gold?"none":"1px solid var(--borderS)", borderRadius:"8px", padding:"10px 18px", fontFamily:"'Raleway',sans-serif", fontSize:"12px", fontWeight:gold?600:400, letterSpacing:"0.1em", textTransform:"uppercase", transition:"all 0.2s", boxShadow:gold?"0 2px 14px rgba(196,92,42,0.4)":"none" }}>
+                    {lbl}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {addOpen && (
+            <div style={{ margin:"24px 52px", background:"var(--bg2)", border:"1px solid var(--border)", borderRadius:"16px", padding:"24px" }}>
+              <div style={{ fontFamily:"'Playfair Display',serif", fontSize:"18px", fontWeight:700, color:"var(--cream)", marginBottom:"18px" }}>Add a Memory</div>
+              <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"14px", marginBottom:"14px" }}>
+                <div><Lbl>Title</Lbl><FInput value={nm.title} onChange={v => setNm({...nm,title:v})} placeholder="Memory title" /></div>
+                <div><Lbl>Date</Lbl><FInput type="date" value={nm.date} onChange={v => setNm({...nm,date:v})} /></div>
+              </div>
+              <div style={{ marginBottom:"14px" }}>
+                <Lbl>Description</Lbl>
+                <textarea value={nm.desc} onChange={e => setNm({...nm,desc:e.target.value})} placeholder="Describe this memory..."
+                  style={{ width:"100%", background:"var(--bg1)", border:"1px solid var(--borderS)", borderRadius:"10px", padding:"12px 14px", color:"var(--cream)", fontSize:"13px", fontFamily:"'Raleway',sans-serif", fontWeight:300, resize:"vertical", minHeight:"72px" }} />
+              </div>
+              <div style={{ marginBottom:"18px" }}>
+                <Lbl>Photo (optional)</Lbl>
+                <div onClick={() => fileRef.current.click()} style={{ border:"1px dashed var(--borderS)", borderRadius:"10px", padding:"16px", textAlign:"center", cursor:"pointer", transition:"border-color 0.2s" }}
+                  onMouseEnter={e => e.currentTarget.style.borderColor="var(--sunset3)"}
+                  onMouseLeave={e => e.currentTarget.style.borderColor="var(--borderS)"}>
+                  <input ref={fileRef} type="file" accept="image/*" style={{ display:"none" }} onChange={e => { const f=e.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=ev=>setImgPrev(ev.target.result); r.readAsDataURL(f); }} />
+                  {imgPrev
+                    ? <img src={imgPrev} alt="" style={{ maxHeight:"110px", borderRadius:"8px", objectFit:"cover" }} />
+                    : <div style={{ fontFamily:"'Raleway',sans-serif", fontSize:"13px", color:"var(--cream40)", fontWeight:300 }}>Click to add a photo</div>}
+                </div>
+              </div>
+              <div style={{ display:"flex", gap:"10px" }}>
+                <button onClick={saveAdd} style={{ background:"linear-gradient(135deg,var(--sunset1),var(--sunset3))", color:"var(--cream)", border:"none", borderRadius:"8px", padding:"12px 24px", fontFamily:"'Raleway',sans-serif", fontSize:"12px", fontWeight:600, letterSpacing:"0.1em", textTransform:"uppercase" }}>Save Memory</button>
+                <button onClick={() => { setAddOpen(false); setImgPrev(null); setNm({title:"",date:"",desc:""}); }} style={{ background:"transparent", border:"1px solid var(--borderS)", color:"var(--cream40)", borderRadius:"8px", padding:"12px 24px", fontFamily:"'Raleway',sans-serif", fontSize:"12px", letterSpacing:"0.1em", textTransform:"uppercase" }}>Cancel</button>
+              </div>
+            </div>
+          )}
+
+          <div style={{ padding:"36px 52px 80px", maxWidth:"800px" }}>
+            {mems.length === 0 && <div style={{ textAlign:"center", padding:"80px 20px", color:"var(--cream40)", fontFamily:"'Raleway',sans-serif", fontWeight:300 }}><div style={{ fontSize:"36px", marginBottom:"14px" }}>✦</div>Empty vault. Add memories or use AI Import.</div>}
+            {years.map(year => (
+              <div key={year} style={{ marginBottom:"44px" }}>
+                <div style={{ display:"flex", alignItems:"center", gap:"16px", marginBottom:"4px", paddingLeft:"118px" }}>
+                  <div style={{ fontFamily:"'Raleway',sans-serif", fontSize:"10px", letterSpacing:"0.22em", color:vault.color, textTransform:"uppercase" }}>{year}</div>
+                  <div style={{ flex:1, height:"1px", background:`linear-gradient(90deg, ${vault.color}88, transparent)` }} />
+                </div>
+                {byYear[year].map((m, idx) => <MemRow key={m.id} m={m} last={idx===byYear[year].length-1} vc={vault.color} />)}
+              </div>
+            ))}
+          </div>
+
+          {showSS && <Slideshow mems={mems} vault={vault} onClose={() => setShowSS(false)} />}
+          {showColl && <Collage mems={mems} vault={vault} onClose={() => setShowColl(false)} />}
+        </div>
+      );
+    }
+
+    /* ══ VAULT CARD ══ */
+    function VaultCard({ vault, count, onOpen, onImport }) {
+      const [h, setH] = useState(false);
+      return (
+        <div onMouseEnter={() => setH(true)} onMouseLeave={() => setH(false)}
+          style={{ background:h?"rgba(196,92,42,0.07)":"var(--bg2)", border:`1px solid ${h?"rgba(196,92,42,0.3)":"var(--borderS)"}`, borderRadius:"18px", padding:"26px 28px", transition:"all 0.3s", transform:h?"translateY(-3px)":"none", position:"relative", overflow:"hidden" }}>
+          <div style={{ position:"absolute", top:0, left:0, right:0, height:"2px", background:`linear-gradient(90deg, ${vault.color}, transparent)`, opacity:h?1:0.4, transition:"opacity 0.3s" }} />
+          <div style={{ display:"flex", justifyContent:"space-between", marginBottom:"14px" }}>
+            <div style={{ fontFamily:"'Raleway',sans-serif", fontSize:"11px", letterSpacing:"0.2em", color:vault.color, textTransform:"uppercase" }}>{vault.icon} Vault</div>
+            <div style={{ fontFamily:"'Playfair Display',serif", fontSize:"26px", fontWeight:300, color:vault.color, opacity:0.45 }}>{count}</div>
+          </div>
+          <div style={{ fontFamily:"'Playfair Display',serif", fontSize:"26px", fontWeight:700, color:"var(--cream)", marginBottom:"5px" }}>{vault.name}</div>
+          <div style={{ fontFamily:"'Raleway',sans-serif", fontSize:"12px", color:"var(--cream40)", fontWeight:300, marginBottom:"20px" }}>{count} {count===1?"memory":"memories"}</div>
+          <div style={{ display:"flex", gap:"8px" }}>
+            <button onClick={onOpen} style={{ flex:1, background:"var(--cream10)", border:"1px solid var(--borderS)", color:"var(--cream70)", borderRadius:"8px", padding:"9px 12px", fontFamily:"'Raleway',sans-serif", fontSize:"11px", letterSpacing:"0.1em", textTransform:"uppercase", transition:"all 0.2s" }}
+              onMouseEnter={e => e.target.style.color="var(--cream)"}
+              onMouseLeave={e => e.target.style.color="var(--cream70)"}>Open</button>
+            <button onClick={e => { e.stopPropagation(); onImport(); }} style={{ background:`${vault.color}25`, border:`1px solid ${vault.color}60`, color:vault.color, borderRadius:"8px", padding:"9px 14px", fontFamily:"'Raleway',sans-serif", fontSize:"11px", letterSpacing:"0.1em", textTransform:"uppercase", transition:"all 0.2s" }}
+              onMouseEnter={e => { e.target.style.background=vault.color; e.target.style.color="var(--bg0)"; }}
+              onMouseLeave={e => { e.target.style.background=`${vault.color}25`; e.target.style.color=vault.color; }}>AI Import</button>
+          </div>
+        </div>
+      );
+    }
+
+    /* ══ HOME ══ */
+    function Home({ user, vaults, memories, onOpenVault, onImportVault, onNewVault }) {
+      const [newV, setNewV] = useState(false);
+      const [nf, setNf] = useState({ name:"", icon:"◇", color:"#C45C2A" });
+      const ICONS = ["◇","◈","◎","⌂","✦","△","○","□"];
+      const COLORS = ["#C45C2A","#D4743A","#E8914A","#F0A85C","#E8A840","#AD8060","#D4906A","#B86040"];
+
+      return (
+        <div style={{ padding:"56px 48px", maxWidth:"1000px", margin:"0 auto" }}>
+          <div className="fu" style={{ marginBottom:"56px" }}>
+            <div style={{ fontFamily:"'Raleway',sans-serif", fontSize:"11px", letterSpacing:"0.32em", color:"var(--sunset3)", textTransform:"uppercase", marginBottom:"14px" }}>✦ Your Archive</div>
+            <h1 style={{ fontFamily:"'Playfair Display',serif", fontSize:"clamp(48px,6vw,76px)", fontWeight:900, color:"var(--cream)", lineHeight:0.92, letterSpacing:"-0.025em" }}>
+              {user.name}'s<br/><span className="gold-text">Vault</span>
+            </h1>
+            <p style={{ fontFamily:"'Raleway',sans-serif", fontSize:"14px", color:"var(--cream40)", fontWeight:300, marginTop:"16px", lineHeight:1.75 }}>
+              {memories.length} memories across {vaults.length} vaults
+            </p>
+          </div>
+
+          {/* Life thread banner */}
+          <div className="fu" style={{ animationDelay:"0.08s", marginBottom:"40px" }}>
+            <div style={{ background:"linear-gradient(135deg, rgba(196,92,42,0.15) 0%, rgba(232,168,64,0.08) 100%)", border:"1px solid var(--border)", borderRadius:"18px", padding:"26px 32px", display:"flex", justifyContent:"space-between", alignItems:"center", cursor:"pointer", transition:"all 0.3s" }}
+              onMouseEnter={e => e.currentTarget.style.background="linear-gradient(135deg, rgba(196,92,42,0.22) 0%, rgba(232,168,64,0.12) 100%)"}
+              onMouseLeave={e => e.currentTarget.style.background="linear-gradient(135deg, rgba(196,92,42,0.15) 0%, rgba(232,168,64,0.08) 100%)"}>
+              <div>
+                <div style={{ fontFamily:"'Raleway',sans-serif", fontSize:"10px", letterSpacing:"0.24em", color:"var(--gold)", textTransform:"uppercase", marginBottom:"8px" }}>✦ &nbsp;Golden Thread</div>
+                <div style={{ fontFamily:"'Playfair Display',serif", fontSize:"26px", fontWeight:900, color:"var(--cream)" }}>Your Life Timeline</div>
+                <div style={{ fontFamily:"'Raleway',sans-serif", fontSize:"13px", color:"var(--cream40)", fontWeight:300, marginTop:"4px" }}>Every vault woven into one scrollable story</div>
+              </div>
+              <div style={{ fontFamily:"'Playfair Display',serif", fontSize:"36px", color:"var(--gold)", opacity:0.5 }}>→</div>
+            </div>
+          </div>
+
+          <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))", gap:"14px" }}>
+            {vaults.map((v, i) => {
+              const vm = memories.filter(m => m.vaultId === v.id);
+              return (
+                <div key={v.id} className="fu" style={{ animationDelay:`${0.1+i*0.07}s` }}>
+                  <VaultCard vault={v} count={vm.length} onOpen={() => onOpenVault(v)} onImport={() => onImportVault(v)} />
+                </div>
+              );
+            })}
+            <div className="fu" style={{ animationDelay:`${0.1+vaults.length*0.07}s` }}>
+              <button onClick={() => setNewV(true)} style={{ width:"100%", minHeight:"165px", background:"transparent", border:"1px dashed var(--borderS)", borderRadius:"18px", color:"var(--cream40)", fontFamily:"'Raleway',sans-serif", fontSize:"11px", fontWeight:300, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:"10px", textTransform:"uppercase", letterSpacing:"0.12em", transition:"all 0.2s" }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor="var(--sunset3)"; e.currentTarget.style.color="var(--cream70)"; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor="var(--borderS)"; e.currentTarget.style.color="var(--cream40)"; }}>
+                <span style={{ fontSize:"22px" }}>+</span>New Vault
+              </button>
+            </div>
+          </div>
+
+          {newV && (
+            <div className="fi" onClick={() => setNewV(false)} style={{ position:"fixed", inset:0, background:"rgba(10,4,0,0.88)", backdropFilter:"blur(14px)", zIndex:200, display:"flex", alignItems:"center", justifyContent:"center", padding:"24px" }}>
+              <div className="si" onClick={e => e.stopPropagation()} style={{ background:"var(--bg2)", border:"1px solid var(--border)", borderRadius:"22px", padding:"34px", width:"100%", maxWidth:"400px" }}>
+                <div style={{ fontFamily:"'Playfair Display',serif", fontSize:"24px", fontWeight:700, color:"var(--cream)", marginBottom:"24px" }}>Create a Vault</div>
+                <div style={{ display:"flex", flexDirection:"column", gap:"16px" }}>
+                  <div><Lbl>Person or Group Name</Lbl><FInput value={nf.name} onChange={v => setNf({...nf,name:v})} placeholder="e.g. Mom, College Friends" /></div>
+                  <div>
+                    <Lbl>Icon</Lbl>
+                    <div style={{ display:"flex", gap:"8px" }}>
+                      {ICONS.map(ic => <button key={ic} onClick={() => setNf({...nf,icon:ic})} style={{ width:"36px", height:"36px", borderRadius:"8px", background:nf.icon===ic?"var(--bg3)":"var(--bg1)", border:`1px solid ${nf.icon===ic?"var(--sunset3)":"var(--borderS)"}`, color:"var(--cream)", fontSize:"15px", transition:"all 0.15s" }}>{ic}</button>)}
+                    </div>
+                  </div>
+                  <div>
+                    <Lbl>Color</Lbl>
+                    <div style={{ display:"flex", gap:"8px" }}>
+                      {COLORS.map(c => <button key={c} onClick={() => setNf({...nf,color:c})} style={{ width:"28px", height:"28px", borderRadius:"50%", background:c, border:`2px solid ${nf.color===c?"var(--cream)":"transparent"}`, transition:"all 0.15s" }} />)}
+                    </div>
+                  </div>
+                  <button onClick={() => { if(!nf.name) return; onNewVault({id:uid(),name:nf.name,icon:nf.icon,color:nf.color}); setNewV(false); setNf({name:"",icon:"◇",color:"#C45C2A"}); }}
+                    style={{ background:"linear-gradient(135deg,var(--sunset1),var(--sunset3))", color:"var(--cream)", border:"none", borderRadius:"10px", padding:"14px", fontFamily:"'Raleway',sans-serif", fontSize:"13px", fontWeight:600, letterSpacing:"0.1em", textTransform:"uppercase", boxShadow:"0 4px 20px rgba(196,92,42,0.4)", marginTop:"6px" }}>
+                    Create Vault
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    /* ══ MAIN APP ══ */
+    function MainApp({ user }) {
+      const [view, setView] = useState("home");
+      const [vaults, setVaults] = useState(INIT_VAULTS);
+      const [memories, setMemories] = useState(INIT_MEMORIES);
+      const [activeVault, setActiveVault] = useState(null);
+      const [importVault, setImportVault] = useState(null);
+
+      const openVault = v => { setActiveVault(v); setView("vault"); };
+      const addMem  = m  => setMemories(p => [...p, m]);
+      const addMems = ms => setMemories(p => [...p, ...ms]);
+      const addVault = v => setVaults(p => [...p, v]);
+
+      return (
+        <div style={{ minHeight:"100vh", background:"var(--bg1)" }}>
+          <nav style={{ position:"fixed", top:0, left:0, right:0, zIndex:50, padding:"16px 48px", display:"flex", justifyContent:"space-between", alignItems:"center", background:"rgba(26,15,8,0.92)", backdropFilter:"blur(18px)", borderBottom:"1px solid var(--borderS)" }}>
+            <div onClick={() => setView("home")} style={{ fontFamily:"'Playfair Display',serif", fontSize:"22px", fontWeight:900, cursor:"pointer" }}>
+              <span className="gold-text">VAULT</span>
+            </div>
+            <div style={{ display:"flex", gap:"6px" }}>
+              {[["home","Archive"],["thread","Life Thread"]].map(([v,l]) => (
+                <button key={v} onClick={() => setView(v)} style={{ background:view===v?"rgba(196,92,42,0.2)":"transparent", border:`1px solid ${view===v?"rgba(196,92,42,0.5)":"transparent"}`, color:view===v?"var(--sunset4)":"var(--cream40)", borderRadius:"8px", padding:"8px 16px", fontFamily:"'Raleway',sans-serif", fontSize:"12px", letterSpacing:"0.1em", textTransform:"uppercase", transition:"all 0.2s" }}>{l}</button>
+              ))}
+            </div>
+            <div style={{ fontFamily:"'Raleway',sans-serif", fontSize:"12px", color:"var(--cream40)", fontWeight:300 }}>{user.name}</div>
+          </nav>
+
+          <div style={{ paddingTop:"64px" }}>
+            {view === "home" && <Home user={user} vaults={vaults} memories={memories} onOpenVault={openVault} onImportVault={setImportVault} onNewVault={addVault} />}
+
+            {view === "thread" && (
+              <div style={{ maxWidth:"860px", margin:"0 auto", padding:"40px 24px" }}>
+                <div className="fu" style={{ textAlign:"center", marginBottom:"60px" }}>
+                  <div style={{ fontFamily:"'Raleway',sans-serif", fontSize:"10px", letterSpacing:"0.3em", color:"var(--gold)", textTransform:"uppercase", marginBottom:"12px" }}>Golden Thread</div>
+                  <h2 style={{ fontFamily:"'Playfair Display',serif", fontSize:"clamp(36px,5vw,58px)", fontWeight:900, color:"var(--cream)", lineHeight:0.95 }}>
+                    <span className="gold-text">Your Life Timeline</span>
+                  </h2>
+                  <p style={{ fontFamily:"'Raleway',sans-serif", fontSize:"13px", color:"var(--cream40)", fontWeight:300, marginTop:"14px", lineHeight:1.75 }}>Every milestone. Every vault. One golden thread.</p>
+                </div>
+                <GoldenThread milestones={MILESTONES} vaults={vaults} onVaultOpen={openVault} />
+              </div>
+            )}
+
+            {view === "vault" && activeVault && (
+              <VaultView vault={activeVault} mems={memories.filter(m => m.vaultId === activeVault.id)} onBack={() => setView("home")} onAdd={addMem} onImportAI={() => setImportVault(activeVault)} />
+            )}
+          </div>
+
+          {importVault && <AIImport vault={importVault} onDone={ms => { addMems(ms); setImportVault(null); }} onClose={() => setImportVault(null)} />}
+        </div>
+      );
+    }
+
+    /* ══ ROOT ══ */
+    function Root() {
+      const [user, setUser] = useState(null);
+      return (
+        <div style={{ minHeight:"100vh", background:"var(--bg1)", color:"var(--cream)" }}>
+          {!user ? <Auth onAuth={setUser} /> : <MainApp user={user} />}
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<Root />);
+  </script>
+
 </body>
 </html>
