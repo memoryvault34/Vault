@@ -2,11 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vault Archive</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>VAULT | Archive</title>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
     <div id="root"></div>
@@ -15,80 +16,139 @@
         const { useState, useEffect } = React;
 
         // --- STYLES ---
-        const GS = () => (
+        const GlobalStyles = () => (
             <style>{`
-                @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Raleway:wght@300;400;600&display=swap');
+                @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Raleway:wght@300;400;600&display=swap');
+                
                 :root {
-                    --bg0: #1A0F08; --bg1: #251508; --bg2: #2E1A0C;
-                    --sunset1: #C45C2A; --gold: #E8A840; --cream: #F5EDE0;
+                    --bg0: #120A05; --bg1: #1A0F08; --bg2: #251508;
+                    --sunset: #C45C2A; --gold: #E8A840; --cream: #F5EDE0;
                 }
-                body { background: var(--bg1); color: var(--cream); font-family: 'Raleway', sans-serif; margin: 0; }
-                .gold-text { color: var(--gold); font-family: 'Playfair Display', serif; }
-                .btn { background: var(--gold); color: var(--bg0); border: none; padding: 12px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; }
-                .card { background: var(--bg2); padding: 20px; border-radius: 15px; margin-bottom: 15px; border-left: 4px solid var(--sunset1); }
+
+                body { 
+                    background: var(--bg0); color: var(--cream); 
+                    font-family: 'Raleway', sans-serif; margin: 0; padding: 0;
+                    -webkit-font-smoothing: antialiased;
+                }
+
+                .gold-text { 
+                    background: linear-gradient(90deg, #E8A840, #F5C860);
+                    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+                    font-family: 'Playfair Display', serif;
+                }
+
+                .vault-card {
+                    background: var(--bg2); padding: 25px; border-radius: 20px;
+                    margin-bottom: 15px; border: 1px solid rgba(232,168,64,0.1);
+                    transition: transform 0.2s;
+                }
+
+                .vault-card:active { transform: scale(0.98); }
+
+                .input-field {
+                    width: 100%; background: var(--bg1); border: 1px solid rgba(245,237,224,0.2);
+                    padding: 15px; border-radius: 12px; color: white; margin-bottom: 15px;
+                }
+
+                .btn-gold {
+                    background: var(--gold); color: var(--bg0); border: none;
+                    padding: 15px 30px; border-radius: 12px; font-weight: 700;
+                    width: 100%; text-transform: uppercase; letter-spacing: 1px;
+                }
+                
+                .memory-item {
+                    background: rgba(255,255,255,0.03); padding: 15px;
+                    border-radius: 12px; margin-bottom: 10px; border-left: 3px solid var(--sunset);
+                }
             `}</style>
         );
 
-        // --- MAIN APP ---
+        const INIT_VAULTS = [
+            { id: 'family', name: 'Family Vault', icon: 'fa-house-chimney', color: '#C45C2A' },
+            { id: 'partner', name: 'Jordan', icon: 'fa-heart', color: '#D4743A' }
+        ];
+
         function App() {
-            const [view, setView] = useState('auth');
-            const [user, setUser] = useState('');
+            const [view, setView] = useState('home');
+            const [selectedVault, setSelectedVault] = useState(null);
             const [memories, setMemories] = useState(() => {
-                const saved = localStorage.getItem("vault_mems");
+                const saved = localStorage.getItem("vault_v3_data");
                 return saved ? JSON.parse(saved) : [];
             });
 
             useEffect(() => {
-                localStorage.setItem("vault_mems", JSON.stringify(memories));
+                localStorage.setItem("vault_v3_data", JSON.stringify(memories));
             }, [memories]);
 
-            const addMemory = () => {
-                const title = prompt("Memory Title?");
-                if(title) setMemories([...memories, { id: Date.now(), title, date: new Date().toLocaleDateString() }]);
+            const addEntry = (vaultId) => {
+                const title = prompt("Describe this memory:");
+                if(!title) return;
+                const newMem = {
+                    id: Date.now(),
+                    vaultId: vaultId,
+                    title: title,
+                    date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+                };
+                setMemories([newMem, ...memories]);
             };
 
-            if (view === 'auth') {
-                return (
-                    <div style={{ padding: '100px 20px', textAlign: 'center' }}>
-                        <h1 className="gold-text" style={{ fontSize: '3rem' }}>VAULT</h1>
-                        <p>Secure Memory Archive</p>
-                        <button className="btn" onClick={() => setView('home')}>Enter Vault</button>
-                    </div>
-                );
-            }
-
-            return (
-                <div style={{ padding: '20px' }}>
-                    <nav style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '40px' }}>
-                        <h2 className="gold-text">VAULT</h2>
-                        <button onClick={() => setView('auth')} style={{ color: 'var(--gold)', background: 'none', border: 'none' }}>Logout</button>
-                    </nav>
-
-                    <div style={{ marginBottom: '30px' }}>
-                        <button className="btn" onClick={addMemory}>+ New Memory</button>
-                    </div>
-
-                    <div>
-                        {memories.length === 0 ? <p style={{ opacity: 0.5 }}>No memories yet. Add your first one.</p> : 
-                        memories.map(m => (
-                            <div key={m.id} className="card">
-                                <h3>{m.title}</h3>
-                                <small>{m.date}</small>
+            const VaultDetail = ({ vault }) => (
+                <div style={{ padding: '20px', animation: 'fadeIn 0.5s' }}>
+                    <button onClick={() => setView('home')} style={{ background: 'none', border: 'none', color: 'var(--gold)', fontSize: '1.2rem', marginBottom: '20px' }}>
+                        <i className="fa-solid fa-arrow-left"></i> Back
+                    </button>
+                    <h1 className="gold-text">{vault.name}</h1>
+                    <button className="btn-gold" onClick={() => addEntry(vault.id)}>+ Add New Memory</button>
+                    
+                    <div style={{ marginTop: '30px' }}>
+                        {memories.filter(m => m.vaultId === vault.id).map(m => (
+                            <div key={m.id} className="memory-item">
+                                <div style={{ fontWeight: 'bold' }}>{m.title}</div>
+                                <div style={{ fontSize: '0.8rem', opacity: 0.6 }}>{m.date}</div>
                             </div>
                         ))}
                     </div>
                 </div>
             );
+
+            return (
+                <div style={{ maxWidth: '500px', margin: '0 auto', minHeight: '100vh' }}>
+                    <GlobalStyles />
+                    
+                    {view === 'home' ? (
+                        <div style={{ padding: '40px 20px' }}>
+                            <header style={{ marginBottom: '40px' }}>
+                                <h1 className="gold-text" style={{ fontSize: '2.5rem', margin: 0 }}>VAULT</h1>
+                                <p style={{ opacity: 0.5, fontSize: '0.9rem' }}>YOUR DIGITAL LEGACY</p>
+                            </header>
+
+                            <h3 style={{ marginBottom: '20px', letterSpacing: '2px', fontSize: '0.8rem', opacity: 0.7 }}>SELECT ARCHIVE</h3>
+                            
+                            {INIT_VAULTS.map(vault => (
+                                <div key={vault.id} className="vault-card" onClick={() => { setSelectedVault(vault); setView('vault'); }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                                        <div style={{ background: vault.color, width: '40px', height: '40px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                            <i className={`fa-solid ${vault.icon}`} style={{ color: 'white' }}></i>
+                                        </div>
+                                        <div>
+                                            <div style={{ fontWeight: '700', fontSize: '1.1rem' }}>{vault.name}</div>
+                                            <div style={{ fontSize: '0.8rem', opacity: 0.5 }}>
+                                                {memories.filter(m => m.vaultId === vault.id).length} Entries
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <VaultDetail vault={selectedVault} />
+                    )}
+                </div>
+            );
         }
 
-        // --- RENDER ---
         const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(
-            <React.Fragment>
-                <GS />
-                <App />
-            </React.Fragment>
-        );
+        root.render(<App />);
     </script>
 </body>
 </html>
