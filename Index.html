@@ -1,20 +1,94 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vault</title>
+    <title>Vault Archive</title>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 </head>
 <body>
     <div id="root"></div>
+
     <script type="text/babel">
-      /* PASTE THE HUGE BLOCK OF JSX CODE I GAVE YOU EARLIER RIGHT HERE */
-      /* BUT CHANGE THE VERY LAST LINE FROM "export default function App" TO: */
-      const root = ReactDOM.createRoot(document.getElementById('root'));
-      root.render(<App />);
+        const { useState, useEffect } = React;
+
+        // --- STYLES ---
+        const GS = () => (
+            <style>{`
+                @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Raleway:wght@300;400;600&display=swap');
+                :root {
+                    --bg0: #1A0F08; --bg1: #251508; --bg2: #2E1A0C;
+                    --sunset1: #C45C2A; --gold: #E8A840; --cream: #F5EDE0;
+                }
+                body { background: var(--bg1); color: var(--cream); font-family: 'Raleway', sans-serif; margin: 0; }
+                .gold-text { color: var(--gold); font-family: 'Playfair Display', serif; }
+                .btn { background: var(--gold); color: var(--bg0); border: none; padding: 12px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; }
+                .card { background: var(--bg2); padding: 20px; border-radius: 15px; margin-bottom: 15px; border-left: 4px solid var(--sunset1); }
+            `}</style>
+        );
+
+        // --- MAIN APP ---
+        function App() {
+            const [view, setView] = useState('auth');
+            const [user, setUser] = useState('');
+            const [memories, setMemories] = useState(() => {
+                const saved = localStorage.getItem("vault_mems");
+                return saved ? JSON.parse(saved) : [];
+            });
+
+            useEffect(() => {
+                localStorage.setItem("vault_mems", JSON.stringify(memories));
+            }, [memories]);
+
+            const addMemory = () => {
+                const title = prompt("Memory Title?");
+                if(title) setMemories([...memories, { id: Date.now(), title, date: new Date().toLocaleDateString() }]);
+            };
+
+            if (view === 'auth') {
+                return (
+                    <div style={{ padding: '100px 20px', textAlign: 'center' }}>
+                        <h1 className="gold-text" style={{ fontSize: '3rem' }}>VAULT</h1>
+                        <p>Secure Memory Archive</p>
+                        <button className="btn" onClick={() => setView('home')}>Enter Vault</button>
+                    </div>
+                );
+            }
+
+            return (
+                <div style={{ padding: '20px' }}>
+                    <nav style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '40px' }}>
+                        <h2 className="gold-text">VAULT</h2>
+                        <button onClick={() => setView('auth')} style={{ color: 'var(--gold)', background: 'none', border: 'none' }}>Logout</button>
+                    </nav>
+
+                    <div style={{ marginBottom: '30px' }}>
+                        <button className="btn" onClick={addMemory}>+ New Memory</button>
+                    </div>
+
+                    <div>
+                        {memories.length === 0 ? <p style={{ opacity: 0.5 }}>No memories yet. Add your first one.</p> : 
+                        memories.map(m => (
+                            <div key={m.id} className="card">
+                                <h3>{m.title}</h3>
+                                <small>{m.date}</small>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        }
+
+        // --- RENDER ---
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(
+            <React.Fragment>
+                <GS />
+                <App />
+            </React.Fragment>
+        );
     </script>
 </body>
 </html>
