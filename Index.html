@@ -129,12 +129,12 @@ const { useState, useEffect, useRef, useCallback, createContext, useContext } = 
 //  CONFIGURATION — REPLACE THESE WITH YOUR SUPABASE VALUES
 //  You'll get these from your Supabase project dashboard.
 // ============================================================
-const SUPABASE_URL = "YOUR_SUPABASE_URL";
-const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
+const SUPABASE_URL = "https://shwtfcpyargginvodgpd.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNod3RmY3B5YXJnZ2ludm9kZ3BkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1MTgxNjYsImV4cCI6MjA5MDA5NDE2Nn0.zFOwrO2mLtUfo2XZIxlf3GTnu6tOwdzmrEhvxwVhIfw";
 
 // Your Netlify site URL (after deploying)
 // e.g. "https://your-vault-app.netlify.app"
-const NETLIFY_FUNCTION_URL = "YOUR_NETLIFY_URL/.netlify/functions/analyze-photos";
+const NETLIFY_FUNCTION_URL = "https://my-memory-vault.netlify.app/.netlify/functions/analyze-photos";
 
 // ── Initialize Supabase ──────────────────────────────────────
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
