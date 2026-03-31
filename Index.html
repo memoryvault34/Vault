@@ -1198,78 +1198,73 @@ const ONBOARDING_STEPS = [
     id: "welcome",
     emoji: "✦",
     title: "Welcome to Vault",
-    body: "Vault turns your camera roll into a curated timeline of your life — organized by the people and moments that matter most. Let's show you how it works.",
-    cta: "Show Me →",
-    highlight: null,
+    body: "Vault turns your camera roll into a curated timeline of your life — organized by the people and moments that matter most.",
+    cta: "Show Me How →",
   },
   {
     id: "vaults",
     emoji: "⌂",
     title: "These are your Vaults",
-    body: "Each vault is dedicated to a person or group in your life — Family, your partner, friends, or just yourself. Think of them as chapters in your story.",
-    cta: "Got it →",
-    highlight: "vaults",
+    body: "Each vault is a chapter — dedicated to a person or group in your life. Family, your partner, friends, or just yourself. Tap any vault to open it.",
+    cta: "Next →",
   },
   {
     id: "memories",
     emoji: "📸",
-    title: "Vaults hold your Memories",
-    body: "Tap any vault to see a timeline of memories inside it. Each memory is a photo, a moment, a milestone — organized by date so your story unfolds naturally.",
+    title: "Memories live inside Vaults",
+    body: "Inside each vault is a timeline of memories — photos, moments, milestones — organized by date so your story unfolds naturally.",
     cta: "Next →",
-    highlight: "vaults",
   },
   {
     id: "ai",
-    emoji: "✦",
-    title: "AI does the heavy lifting",
-    body: "Tap 'AI Import' inside any vault. Tell the AI what you're looking for — like 'Summer 2022' or 'group photos with friends' — and it will scan your photos and pre-select the best matches. You just approve.",
+    emoji: "🤖",
+    title: "AI does 95% of the work",
+    body: "Tap 'AI Import' inside any vault. Describe what you're looking for — 'Summer 2022' or 'group photos with friends' — and Claude Vision will scan your photos and pre-select the best matches. You just approve.",
     cta: "Next →",
-    highlight: "ai",
   },
   {
     id: "thread",
     emoji: "🧵",
     title: "The Golden Thread",
-    body: "The Life Thread weaves all your vaults into one scrollable timeline — every milestone, every relationship, every chapter of your life in chronological order.",
+    body: "Tap 'Life Thread' in the nav bar. It weaves every vault into one scrollable timeline — your entire life story in chronological order.",
     cta: "Next →",
-    highlight: "thread",
   },
   {
     id: "collage",
     emoji: "🖼",
     title: "Collages & Slideshows",
-    body: "Inside each vault you can create a beautiful photo collage or play a cinematic slideshow of your memories — making it feel like more than just a camera roll.",
+    body: "Inside any vault, tap 'Collage' or 'Slideshow' to turn your memories into something beautiful — not just a folder of photos.",
     cta: "Next →",
-    highlight: null,
   },
   {
-    id: "ready",
-    emoji: "🚀",
-    title: "Ready to build your story?",
-    body: "This was a demo vault to show you what's possible. When you're ready, tap below to clear it and start building your own Vault from scratch.",
-    cta: "Start My Vault →",
-    highlight: null,
+    id: "sandbox",
+    emoji: "🎮",
+    title: "Now explore — this is your sandbox",
+    body: "Everything you see is a demo filled with sample memories. Play with it freely — open vaults, add memories, try AI Import, watch a slideshow. Nothing here is real data. When you're ready to start your own story, tap 'Start My Vault' in the top bar.",
+    cta: "Explore the Demo →",
     isFinal: true,
   },
 ];
 
-function OnboardingOverlay({ onComplete, onSkip }) {
+function OnboardingOverlay({ onDismiss }) {
   const [step, setStep] = useState(0);
   const current = ONBOARDING_STEPS[step];
   const isLast = step === ONBOARDING_STEPS.length - 1;
 
   const next = () => {
-    if (isLast) { onComplete(); return; }
+    if (isLast) { onDismiss(); return; }
     setStep(s => s + 1);
   };
 
+  const prev = () => { if (step > 0) setStep(s => s - 1); };
+
   return (
-    <div className="fi" style={{ position:"fixed", inset:0, zIndex:500, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"flex-end", padding:"0 0 40px 0", background:"rgba(10,5,2,0.75)", backdropFilter:"blur(4px)" }}>
+    <div className="fi" style={{ position:"fixed", inset:0, zIndex:500, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"flex-end", padding:"0 0 40px 0", background:"rgba(10,5,2,0.82)", backdropFilter:"blur(6px)" }}>
 
       {/* Progress dots */}
       <div style={{ display:"flex", gap:"8px", marginBottom:"20px" }}>
         {ONBOARDING_STEPS.map((_, i) => (
-          <div key={i} style={{ width: i === step ? "24px" : "8px", height:"8px", borderRadius:"40px", background: i === step ? "var(--gold)" : i < step ? "var(--sunset3)" : "rgba(245,237,224,0.2)", transition:"all 0.3s ease" }} />
+          <div key={i} onClick={() => setStep(i)} style={{ width: i === step ? "24px" : "8px", height:"8px", borderRadius:"40px", background: i === step ? "var(--gold)" : i < step ? "var(--sunset3)" : "rgba(245,237,224,0.2)", transition:"all 0.3s ease", cursor:"pointer" }} />
         ))}
       </div>
 
@@ -1278,7 +1273,7 @@ function OnboardingOverlay({ onComplete, onSkip }) {
         <div style={{ textAlign:"center", marginBottom:"20px" }}>
           <div style={{ fontSize:"40px", marginBottom:"14px" }}>{current.emoji}</div>
           <div style={{ fontFamily:"'Playfair Display',serif", fontSize:"24px", fontWeight:700, color:"var(--cream)", marginBottom:"12px", lineHeight:1.1 }}>{current.title}</div>
-          <div style={{ fontFamily:"'Raleway',sans-serif", fontSize:"14px", color:"var(--cream70)", fontWeight:300, lineHeight:1.8 }}>{current.body}</div>
+          <div style={{ fontFamily:"'Raleway',sans-serif", fontSize:"14px", color:"var(--cream70)", fontWeight:300, lineHeight:1.85 }}>{current.body}</div>
         </div>
 
         {/* Step counter */}
@@ -1286,17 +1281,22 @@ function OnboardingOverlay({ onComplete, onSkip }) {
           {step + 1} of {ONBOARDING_STEPS.length}
         </div>
 
-        {/* CTA button */}
-        <button onClick={next} style={{ width:"100%", background: current.isFinal ? "linear-gradient(135deg,var(--sunset1),var(--sunset3))" : "var(--cream10)", color: current.isFinal ? "var(--cream)" : "var(--cream70)", border: current.isFinal ? "none" : "1px solid var(--borderS)", borderRadius:"12px", padding:"15px", fontFamily:"'Raleway',sans-serif", fontSize:"13px", fontWeight:600, letterSpacing:"0.12em", textTransform:"uppercase", boxShadow: current.isFinal ? "0 4px 20px rgba(196,92,42,0.4)" : "none", marginBottom: current.isFinal ? "0" : "10px" }}>
+        {/* Buttons */}
+        <button onClick={next} style={{ width:"100%", background: current.isFinal ? "linear-gradient(135deg,var(--sunset1),var(--sunset3))" : "var(--cream10)", color: current.isFinal ? "var(--cream)" : "var(--cream70)", border: current.isFinal ? "none" : "1px solid var(--borderS)", borderRadius:"12px", padding:"15px", fontFamily:"'Raleway',sans-serif", fontSize:"13px", fontWeight:600, letterSpacing:"0.12em", textTransform:"uppercase", boxShadow: current.isFinal ? "0 4px 20px rgba(196,92,42,0.4)" : "none", marginBottom:"10px" }}>
           {current.cta}
         </button>
 
-        {/* Skip — only show on non-final steps */}
-        {!current.isFinal && (
-          <button onClick={onSkip} style={{ width:"100%", background:"transparent", border:"none", color:"var(--cream40)", fontFamily:"'Raleway',sans-serif", fontSize:"12px", fontWeight:300, letterSpacing:"0.1em", padding:"8px" }}>
-            Skip tour — explore on my own
-          </button>
-        )}
+        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+          {step > 0
+            ? <button onClick={prev} style={{ background:"transparent", border:"none", color:"var(--cream40)", fontFamily:"'Raleway',sans-serif", fontSize:"12px", fontWeight:300, padding:"6px 0" }}>← Back</button>
+            : <div />
+          }
+          {!current.isFinal && (
+            <button onClick={onDismiss} style={{ background:"transparent", border:"none", color:"var(--cream40)", fontFamily:"'Raleway',sans-serif", fontSize:"12px", fontWeight:300, padding:"6px 0" }}>
+              Skip — explore on my own
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -1374,7 +1374,7 @@ function MainApp({ user }) {
 
   return (
     <div style={{ minHeight:"100vh", background:"var(--bg1)" }}>
-      {isDemo && <DemoBanner onExitDemo={() => setShowOnboarding(true)} />}
+      {isDemo && <DemoBanner onExitDemo={() => setShowExitDemo(true)} />}
 
       {/* Nav */}
       <nav className="nav-pad" style={{ position:"sticky", top:0, zIndex:50, padding:"14px 48px", display:"flex", justifyContent:"space-between", alignItems:"center", background:"rgba(26,15,8,0.95)", backdropFilter:"blur(18px)", borderBottom:"1px solid var(--borderS)" }}>
@@ -1388,7 +1388,7 @@ function MainApp({ user }) {
         </div>
         <div style={{ display:"flex", alignItems:"center", gap:"14px" }}>
           {isDemo && (
-            <button onClick={() => setShowOnboarding(true)}
+            <button onClick={() => setShowExitDemo(true)}
               style={{ background:"linear-gradient(135deg,var(--sunset1),var(--sunset3))", color:"var(--cream)", border:"none", borderRadius:"8px", padding:"8px 16px", fontFamily:"'Raleway',sans-serif", fontSize:"11px", fontWeight:600, letterSpacing:"0.1em", textTransform:"uppercase", boxShadow:"0 2px 10px rgba(196,92,42,0.4)" }}>
               Start My Vault
             </button>
@@ -1459,8 +1459,7 @@ function MainApp({ user }) {
 
       {showOnboarding && (
         <OnboardingOverlay
-          onComplete={exitDemo}
-          onSkip={() => setShowOnboarding(false)}
+          onDismiss={() => setShowOnboarding(false)}
         />
       )}
 
