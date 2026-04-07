@@ -1096,7 +1096,7 @@ function VaultCard({ vault, count, onOpen, onImport, onDelete }) {
 // ══════════════════════════════════════════════════════════════
 //  HOME
 // ══════════════════════════════════════════════════════════════
-function Home({ user, vaults, memories, isDemo, onOpenVault, onImportVault, onNewVault, onDeleteVault }) {
+function Home({ user, vaults, memories, isDemo, onOpenVault, onImportVault, onNewVault, onDeleteVault, onSwitchView }) {
   const [newVOpen, setNewVOpen] = useState(false);
   const [nf, setNf] = useState({ name:"", icon:"◇", color:"#C45C2A" });
   const [creating, setCreating] = useState(false);
@@ -1106,11 +1106,15 @@ function Home({ user, vaults, memories, isDemo, onOpenVault, onImportVault, onNe
   const createVault = async () => {
     if (!nf.name) return;
     setCreating(true);
-    if (isDemo) {
-      onNewVault({ id:uid(), name:nf.name, icon:nf.icon, color:nf.color, is_demo:false });
-    } else {
-      const v = await db.createVault(user.id, { name:nf.name, icon:nf.icon, color:nf.color });
-      if (v) onNewVault(v);
+    try {
+      if (isDemo) {
+        onNewVault({ id:uid(), name:nf.name, icon:nf.icon, color:nf.color, is_demo:false });
+      } else {
+        const v = await db.createVault(user.id, { name:nf.name, icon:nf.icon, color:nf.color });
+        if (v) onNewVault(v);
+      }
+    } catch(e) {
+      console.error("Create vault failed:", e);
     }
     setCreating(false); setNewVOpen(false); setNf({name:"",icon:"◇",color:"#C45C2A"});
   };
@@ -1130,7 +1134,7 @@ function Home({ user, vaults, memories, isDemo, onOpenVault, onImportVault, onNe
 
       {/* Life Thread Banner */}
       <div className="fu" style={{ animationDelay:"0.08s", marginBottom:"36px" }}>
-        <div style={{ background:"linear-gradient(135deg,rgba(196,92,42,0.15) 0%,rgba(232,168,64,0.08) 100%)", border:"1px solid var(--border)", borderRadius:"18px", padding:"24px 30px", display:"flex", justifyContent:"space-between", alignItems:"center", transition:"all 0.3s" }}
+        <div onClick={onSwitchView} style={{ background:"linear-gradient(135deg,rgba(196,92,42,0.15) 0%,rgba(232,168,64,0.08) 100%)", border:"1px solid var(--border)", borderRadius:"18px", padding:"24px 30px", display:"flex", justifyContent:"space-between", alignItems:"center", transition:"all 0.3s", cursor:"pointer" }}
           onMouseEnter={e => e.currentTarget.style.background="linear-gradient(135deg,rgba(196,92,42,0.22) 0%,rgba(232,168,64,0.12) 100%)"}
           onMouseLeave={e => e.currentTarget.style.background="linear-gradient(135deg,rgba(196,92,42,0.15) 0%,rgba(232,168,64,0.08) 100%)"}>
           <div>
@@ -1407,6 +1411,7 @@ function MainApp({ user }) {
           onImportVault={v => setImportVault(v)}
           onNewVault={v => setVaults(p => [...p, v])}
           onDeleteVault={deleteVault}
+          onSwitchView={() => setView("thread")}
         />
       )}
 
