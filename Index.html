@@ -319,6 +319,9 @@ function Auth({ onAuth }) {
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");
   const [resetSent, setResetSent] = useState(false);
+  const [confirmSent, setConfirmSent] = useState(false);
+  const [resending, setResending] = useState(false);
+  const [resendDone, setResendDone] = useState(false);
 
   const submit = async () => {
     if (!f.email || !f.password) { setErr("Please fill in all fields."); return; }
@@ -332,18 +335,34 @@ function Auth({ onAuth }) {
         options: { data: { name: f.name } },
       });
       if (error) { setErr(error.message); setLoading(false); return; }
-      // Update profile with name + dob
       if (data.user) {
         await supabase.from("profiles").update({ name: f.name, dob: f.dob || null }).eq("id", data.user.id);
       }
-      onAuth({ ...data.user, name: f.name, isNew: true });
+      setLoading(false);
+      setConfirmSent(true); // Show confirmation screen instead of logging in
     } else {
       const { data, error } = await supabase.auth.signInWithPassword({ email: f.email, password: f.password });
-      if (error) { setErr(error.message); setLoading(false); return; }
+      if (error) {
+        // If email not confirmed, show helpful message
+        if (error.message.includes("Email not confirmed")) {
+          setErr("Please confirm your email first. Check your inbox — or resend below.");
+          setConfirmSent(true);
+        } else {
+          setErr(error.message);
+        }
+        setLoading(false); return;
+      }
       const profile = await db.getProfile(data.user.id);
       onAuth({ ...data.user, name: profile?.name || f.email.split("@")[0], isNew: false });
     }
     setLoading(false);
+  };
+
+  const resendConfirmation = async () => {
+    setResending(true);
+    const { error } = await supabase.auth.resend({ type:"signup", email: f.email });
+    setResending(false);
+    if (!error) setResendDone(true);
   };
 
   const resetPassword = async () => {
@@ -410,7 +429,29 @@ function Auth({ onAuth }) {
           </div>
         </div>
 
-        {resetSent ? (
+        {confirmSent ? (
+          <div style={{ textAlign:"center", padding:"10px 0" }}>
+            <div style={{ fontSize:"44px", marginBottom:"16px" }}>📬</div>
+            <div style={{ fontFamily:"'Playfair Display',serif", fontSize:"22px", fontWeight:700, color:"var(--cream)", marginBottom:"10px" }}>Check your inbox</div>
+            <div style={{ fontFamily:"'Raleway',sans-serif", fontSize:"13px", color:"var(--cream40)", fontWeight:300, lineHeight:1.8, marginBottom:"28px" }}>
+              We sent a confirmation link to<br/>
+              <span style={{ color:"var(--cream70)", fontWeight:500 }}>{f.email}</span><br/><br/>
+              Click the link in the email to activate your vault. It's valid for <strong style={{ color:"var(--sunset4)" }}>24 hours</strong>.
+            </div>
+            {resendDone ? (
+              <div style={{ fontFamily:"'Raleway',sans-serif", fontSize:"13px", color:"var(--sunset3)", fontWeight:400 }}>✓ New link sent!</div>
+            ) : (
+              <button onClick={resendConfirmation} disabled={resending}
+                style={{ background:"var(--cream10)", border:"1px solid var(--borderS)", color:"var(--cream70)", borderRadius:"10px", padding:"12px 24px", fontFamily:"'Raleway',sans-serif", fontSize:"12px", fontWeight:500, letterSpacing:"0.1em", textTransform:"uppercase", display:"flex", alignItems:"center", justifyContent:"center", gap:"8px", width:"100%", marginBottom:"12px" }}>
+                {resending ? <><Spinner color="var(--cream70)" />Sending...</> : "Resend Confirmation Email"}
+              </button>
+            )}
+            <button onClick={() => { setConfirmSent(false); setScreen("login"); setErr(""); }}
+              style={{ color:"var(--cream40)", fontFamily:"'Raleway',sans-serif", fontSize:"12px", fontWeight:300, marginTop:"12px" }}>
+              ← Back to Sign In
+            </button>
+          </div>
+        ) : resetSent ? (
           <div style={{ textAlign:"center", padding:"20px 0" }}>
             <div style={{ fontSize:"36px", marginBottom:"14px" }}>📬</div>
             <div style={{ fontFamily:"'Playfair Display',serif", fontSize:"20px", fontWeight:700, color:"var(--cream)", marginBottom:"10px" }}>Check your email</div>
@@ -1102,7 +1143,7 @@ function VaultCard({ vault, count, onOpen, onImport, onDelete }) {
 // ══════════════════════════════════════════════════════════════
 //  HOME
 // ══════════════════════════════════════════════════════════════
-function Home({ user, vaults, memories, isDemo, onOpenVault, onImportVault, onNewVault, onDeleteVault, onSwitchView }) {
+function Home({ user, vaults, memories, isDemo, onOpenVault, onImportVault, onNewVault, onDeleteVault, onSwitchView, onRevisitDemo }) {
   const [newVOpen, setNewVOpen] = useState(false);
   const [nf, setNf] = useState({ name:"", icon:"◇", color:"#C45C2A" });
   const [creating, setCreating] = useState(false);
@@ -1170,6 +1211,21 @@ function Home({ user, vaults, memories, isDemo, onOpenVault, onImportVault, onNe
           </button>
         </div>
       </div>
+
+      {/* Revisit demo link — only shown when user has no vaults and is not in demo */}
+      {!isDemo && vaults.length === 0 && (
+        <div style={{ textAlign:"center", marginTop:"40px" }}>
+          <div style={{ fontFamily:"'Raleway',sans-serif", fontSize:"13px", color:"var(--cream40)", fontWeight:300, marginBottom:"10px" }}>
+            Not sure where to start?
+          </div>
+          <button onClick={onRevisitDemo}
+            style={{ background:"transparent", border:"1px solid var(--borderS)", color:"var(--cream40)", borderRadius:"40px", padding:"10px 24px", fontFamily:"'Raleway',sans-serif", fontSize:"12px", fontWeight:400, letterSpacing:"0.1em", textTransform:"uppercase", transition:"all 0.2s" }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor="var(--sunset3)"; e.currentTarget.style.color="var(--cream70)"; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor="var(--borderS)"; e.currentTarget.style.color="var(--cream40)"; }}>
+            ✦ Revisit the Demo
+          </button>
+        </div>
+      )}
 
       {/* New vault modal */}
       {newVOpen && (
@@ -1368,6 +1424,15 @@ function MainApp({ user }) {
     setToast({ message:"Welcome! Your vault is ready.", type:"success" });
   };
 
+  const revisitDemo = () => {
+    setIsDemo(true);
+    setVaults(DEMO_VAULTS);
+    setMemories(DEMO_MEMORIES);
+    setMilestones(DEMO_MILESTONES);
+    setView("home");
+    setToast({ message:"You're back in the demo — explore freely!", type:"success" });
+  };
+
   const signOut = async () => {
     await supabase.auth.signOut();
     window.location.reload();
@@ -1418,6 +1483,7 @@ function MainApp({ user }) {
           onNewVault={v => setVaults(p => [...p, v])}
           onDeleteVault={deleteVault}
           onSwitchView={() => setView("thread")}
+          onRevisitDemo={revisitDemo}
         />
       )}
 
