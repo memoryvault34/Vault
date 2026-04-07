@@ -150,22 +150,28 @@ const DEMO_VAULTS = [
   { id:"demo-solo",    name:"Just Me",          icon:"◇", color:"#F0A85C", is_demo:true },
 ];
 const DEMO_MEMORIES = [
-  { id:"dm1",  vault_id:"demo-family",  memory_date:"2005-03-22", title:"Baby Sibling Born",      description:"The day everything changed — in the best way.",            emoji:"👶" },
-  { id:"dm2",  vault_id:"demo-family",  memory_date:"2010-07-04", title:"Big Move",               description:"A new city, a new chapter for the whole family.",           emoji:"🚚" },
-  { id:"dm3",  vault_id:"demo-family",  memory_date:"2015-08-12", title:"Parents' Anniversary",   description:"A backyard dinner. Someone definitely cried.",              emoji:"💍" },
-  { id:"dm4",  vault_id:"demo-family",  memory_date:"2018-06-10", title:"High School Graduation", description:"The whole family showed up. Worth every mile.",             emoji:"🎓" },
-  { id:"dm5",  vault_id:"demo-family",  memory_date:"2020-11-26", title:"Pandemic Thanksgiving",  description:"Just us. Somehow the best one yet.",                        emoji:"🍂" },
-  { id:"dm6",  vault_id:"demo-family",  memory_date:"2022-05-15", title:"College Graduation",     description:"They flew in. Front row. Ugly crying, all of them.",        emoji:"🎓" },
-  { id:"dm7",  vault_id:"demo-partner", memory_date:"2021-02-14", title:"First Date",             description:"Coffee that turned into dinner that turned into midnight.",  emoji:"◈" },
-  { id:"dm8",  vault_id:"demo-partner", memory_date:"2021-06-01", title:"Made It Official",       description:"No grand gesture. Just — this is it, right?",              emoji:"💌" },
-  { id:"dm9",  vault_id:"demo-partner", memory_date:"2022-08-15", title:"Moved In Together",      description:"Our apartment. IKEA until 2am.",                            emoji:"🏠" },
-  { id:"dm10", vault_id:"demo-partner", memory_date:"2023-07-14", title:"First Big Trip Together",description:"Splurged. Worth every cent.",                               emoji:"✈️" },
-  { id:"dm11", vault_id:"demo-friends", memory_date:"2019-06-15", title:"Road Trip",              description:"No plan. Best trip ever.",                                  emoji:"🚗" },
-  { id:"dm12", vault_id:"demo-friends", memory_date:"2021-08-20", title:"Beach House Week",       description:"Seven people, one fridge. We lasted all week.",             emoji:"🌊" },
-  { id:"dm13", vault_id:"demo-friends", memory_date:"2023-05-20", title:"Friend's Wedding",       description:"First one of the group. Held it together until the vows.",  emoji:"💍" },
-  { id:"dm14", vault_id:"demo-solo",    memory_date:"2020-04-01", title:"Started Journaling",     description:"Lockdown forced me inward. Best thing that happened.",       emoji:"📓" },
-  { id:"dm15", vault_id:"demo-solo",    memory_date:"2022-03-05", title:"First Marathon",         description:"4:12:34. Cried at mile 22.",                                emoji:"🏅" },
-  { id:"dm16", vault_id:"demo-solo",    memory_date:"2024-03-10", title:"Solo Trip Abroad",       description:"Went alone. Came back different.",                          emoji:"✈️" },
+  // FAMILY
+  { id:"dm1",  vault_id:"demo-family",  memory_date:"2005-03-22", title:"Baby Sibling Born",       description:"The day everything changed — in the best way.",            emoji:"👶", photo_url:"https://images.unsplash.com/photo-1476703993599-0035a21b17a9?w=800&q=80" },
+  { id:"dm2",  vault_id:"demo-family",  memory_date:"2010-07-04", title:"Big Move",                description:"A new city, a whole new chapter for the family.",           emoji:"🚚", photo_url:"https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80" },
+  { id:"dm3",  vault_id:"demo-family",  memory_date:"2015-08-12", title:"Parents' Anniversary",    description:"A backyard dinner. Someone definitely cried.",              emoji:"💍", photo_url:"https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=800&q=80" },
+  { id:"dm4",  vault_id:"demo-family",  memory_date:"2018-06-10", title:"High School Graduation",  description:"The whole family showed up. Worth every mile.",             emoji:"🎓", photo_url:"https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800&q=80" },
+  { id:"dm5",  vault_id:"demo-family",  memory_date:"2020-11-26", title:"Pandemic Thanksgiving",   description:"Just us. Somehow the best one yet.",                        emoji:"🍂", photo_url:"https://images.unsplash.com/photo-1606787366850-de6330128bfc?w=800&q=80" },
+  { id:"dm6",  vault_id:"demo-family",  memory_date:"2022-05-15", title:"College Graduation",      description:"They flew in. Front row. Ugly crying, all of them.",        emoji:"🎓", photo_url:"https://images.unsplash.com/photo-1627556704290-2b1f5853ff78?w=800&q=80" },
+  // PARTNER
+  { id:"dm7",  vault_id:"demo-partner", memory_date:"2021-02-14", title:"First Date",              description:"Coffee that turned into dinner that turned into midnight.",  emoji:"◈",  photo_url:"https://images.unsplash.com/photo-1522621157681-54c8c53b6a5d?w=800&q=80" },
+  { id:"dm8",  vault_id:"demo-partner", memory_date:"2021-06-01", title:"Made It Official",        description:"No grand gesture. Just — this is it, right?",              emoji:"💌", photo_url:"https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=800&q=80" },
+  { id:"dm9",  vault_id:"demo-partner", memory_date:"2022-08-15", title:"Moved In Together",       description:"Our apartment. IKEA until 2am. Worth every second.",         emoji:"🏠", photo_url:"https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&q=80" },
+  { id:"dm10", vault_id:"demo-partner", memory_date:"2023-07-14", title:"First Big Trip Together", description:"Splurged. Worth every cent.",                               emoji:"✈️", photo_url:"https://images.unsplash.com/photo-1530521954074-e64f6810b32d?w=800&q=80" },
+  // FRIENDS
+  { id:"dm11", vault_id:"demo-friends", memory_date:"2019-06-15", title:"Road Trip",               description:"No plan. Best trip ever.",                                  emoji:"🚗", photo_url:"https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=800&q=80" },
+  { id:"dm12", vault_id:"demo-friends", memory_date:"2021-08-20", title:"Beach House Week",        description:"Seven people, one fridge. We lasted all week.",             emoji:"🌊", photo_url:"https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80" },
+  { id:"dm13", vault_id:"demo-friends", memory_date:"2022-12-31", title:"New Year's Rooftop",      description:"Cold as hell. Wouldn't change a thing.",                    emoji:"🎆", photo_url:"https://images.unsplash.com/photo-1467810563316-b5476525c0f9?w=800&q=80" },
+  { id:"dm14", vault_id:"demo-friends", memory_date:"2023-05-20", title:"Friend's Wedding",        description:"First one of the group. We held it together until the vows.", emoji:"💍", photo_url:"https://images.unsplash.com/photo-1519741497674-611481863552?w=800&q=80" },
+  // SOLO
+  { id:"dm15", vault_id:"demo-solo",    memory_date:"2020-04-01", title:"Started Journaling",      description:"Lockdown forced me inward. Best thing that happened.",       emoji:"📓", photo_url:"https://images.unsplash.com/photo-1506880018603-83d5b814b5a6?w=800&q=80" },
+  { id:"dm16", vault_id:"demo-solo",    memory_date:"2022-03-05", title:"First Marathon",          description:"4:12:34. Cried at mile 22 and mile 26.2.",                  emoji:"🏅", photo_url:"https://images.unsplash.com/photo-1452573992436-6d508f200b30?w=800&q=80" },
+  { id:"dm17", vault_id:"demo-solo",    memory_date:"2023-09-01", title:"Started Therapy",         description:"Best decision. Hardest conversations. Still going.",         emoji:"🌿", photo_url:"https://images.unsplash.com/photo-1499209974431-9dddcece7f88?w=800&q=80" },
+  { id:"dm18", vault_id:"demo-solo",    memory_date:"2024-03-10", title:"Solo Trip Abroad",        description:"Went alone. Came back completely different.",                emoji:"✈️", photo_url:"https://images.unsplash.com/photo-1488085061387-422e29b40080?w=800&q=80" },
 ];
 const DEMO_MILESTONES = [
   { id:"dms1", milestone_date:"2000-04-12", title:"Born",               label:"Origin",    emoji:"✦",  vault_id:null },
