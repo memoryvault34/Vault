@@ -677,13 +677,15 @@ function AIImport({ vault, userId, onDone, onClose }) {
       try {
         let photoUrl = null, photoPath = null;
 
-        // Upload the storage-quality version
-        const blobSrc = photo.storageBlob || photo.src;
+        // Match back to original photo to get storageBlob
+        const originalPhoto = photos.find(p => p.id === photo.id);
+        const blobSrc = originalPhoto?.storageBlob || originalPhoto?.src || photo.src;
+
         if (blobSrc && blobSrc.startsWith("data:")) {
           try {
             const res = await fetch(blobSrc);
             const blob = await res.blob();
-            const compressedFile = new File([blob], photo.name, { type: "image/jpeg" });
+            const compressedFile = new File([blob], `memory-${uid()}.jpg`, { type: "image/jpeg" });
             const uploaded = await db.uploadPhoto(userId, compressedFile);
             photoUrl = uploaded.url;
             photoPath = uploaded.path;
@@ -693,7 +695,8 @@ function AIImport({ vault, userId, onDone, onClose }) {
         }
 
         const title = photo.aiTitle
-          || photo.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " ");
+          || photo.name?.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " ")
+          || "Memory";
         const mem = await db.createMemory(userId, {
           vault_id: vault.id,
           title,
