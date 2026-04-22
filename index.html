@@ -226,11 +226,18 @@ const db = {
     return data;
   },
   async uploadPhoto(userId, file) {
-    const ext = file.name.split(".").pop();
-    const path = `${userId}/${uid()}.${ext}`;
-    const { error } = await supabase.storage.from("memory-photos").upload(path, file, { upsert: false });
-    if (error) throw error;
+    // Always use jpg since we compress to jpeg
+    const path = `${userId}/${uid()}.jpg`;
+    const { error } = await supabase.storage.from("memory-photos").upload(path, file, { 
+      upsert: false,
+      contentType: "image/jpeg"
+    });
+    if (error) {
+      console.error("Storage upload error:", error);
+      throw error;
+    }
     const { data: { publicUrl } } = supabase.storage.from("memory-photos").getPublicUrl(path);
+    console.log("Uploaded photo URL:", publicUrl);
     return { url: publicUrl, path };
   },
   async deletePhoto(path) {
@@ -642,7 +649,7 @@ function AIImport({ vault, userId, onDone, onClose }) {
       const r = new FileReader();
       r.onload = async e => {
         // Compress aggressively for AI analysis (small = faster, cheaper)
-        const compressed = await compressImage(e.target.result, 800, 0.6);
+        const compressed = await compressImage(e.target.result, 512, 0.5);
         // Keep a medium quality version for storage
         const forStorage = await compressImage(e.target.result, 1200, 0.8);
         imgs.push({ id:uid(), name:f.name, src:compressed, storageBlob:forStorage, date:new Date(f.lastModified).toISOString().split("T")[0] });
