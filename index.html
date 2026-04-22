@@ -249,6 +249,7 @@ async function analyzePhotosWithAI(photos, cfg) {
         prompt: cfg.prompt,
         dateFrom: cfg.from,
         dateTo: cfg.to,
+        vaultName: vault.name,
       }),
     });
     if (!response.ok) throw new Error("AI function error");
@@ -666,12 +667,21 @@ function AIImport({ vault, userId, onDone, onClose }) {
     for (const photo of chosen) {
       try {
         let photoUrl = null, photoPath = null;
-        if (photo.file) {
-          const uploaded = await db.uploadPhoto(userId, photo.file);
-          photoUrl = uploaded.url;
-          photoPath = uploaded.path;
+
+        // Convert compressed base64 src back to a file for upload
+        if (photo.src && photo.src.startsWith("data:")) {
+          try {
+            const res = await fetch(photo.src);
+            const blob = await res.blob();
+            const compressedFile = new File([blob], photo.name, { type: "image/jpeg" });
+            const uploaded = await db.uploadPhoto(userId, compressedFile);
+            photoUrl = uploaded.url;
+            photoPath = uploaded.path;
+          } catch(uploadErr) {
+            console.error("Upload failed:", uploadErr);
+          }
         }
-        // Use AI-generated title if available, otherwise clean up filename
+
         const title = photo.aiTitle
           || photo.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " ");
         const mem = await db.createMemory(userId, {
