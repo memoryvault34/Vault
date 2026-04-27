@@ -245,8 +245,8 @@ const db = {
   },
 };
 
-// ── Real AI analysis via Netlify function ─────────────────────
-async function analyzePhotosWithAI(photos, cfg) {
+// ── Real AI analysis via Cloudflare Worker ─────────────────────
+async function analyzePhotosWithAI(photos, cfg, vaultName) {
   try {
     const response = await fetch(NETLIFY_FUNCTION_URL, {
       method: "POST",
@@ -256,7 +256,7 @@ async function analyzePhotosWithAI(photos, cfg) {
         prompt: cfg.prompt,
         dateFrom: cfg.from,
         dateTo: cfg.to,
-        vaultName: vault.name,
+        vaultName: vaultName || "",
       }),
     });
     if (!response.ok) throw new Error("AI function error");
@@ -264,23 +264,17 @@ async function analyzePhotosWithAI(photos, cfg) {
     return results;
   } catch (err) {
     console.warn("AI analysis failed, using fallback:", err);
-    // Graceful fallback to mock scoring
-    const reasons = [
-      "Faces detected — likely a meaningful social moment",
-      "Date metadata falls within your selected range",
-      "Location data matches your parameters",
-      "Group composition suggests a celebration",
-      "High visual energy — possible milestone event",
-    ];
     return photos.map(p => ({
       ...p,
-      aiScore: Math.random(),
-      aiReason: reasons[Math.floor(Math.random() * reasons.length)],
-      aiPick: Math.random() > 0.3,
-    })).sort((a, b) => b.aiScore - a.aiScore);
+      aiScore: 0.8,
+      aiReason: "Included by default",
+      aiTitle: null,
+      aiDescription: null,
+      aiPick: true,
+    }));
   }
 }
-
+      ...p,
 // ── Shared UI atoms ───────────────────────────────────────────
 function Lbl({ children }) {
   return <div style={{ fontFamily:"'Raleway',sans-serif", fontSize:"10px", letterSpacing:"0.16em", textTransform:"uppercase", color:"var(--cream40)", marginBottom:"8px" }}>{children}</div>;
@@ -664,7 +658,7 @@ function AIImport({ vault, userId, onDone, onClose }) {
     if (!photos.length) return;
     setStep("scanning"); setProg(0);
     const iv = setInterval(() => setProg(p => { const n = p + Math.random()*7; if(n>=90) clearInterval(iv); return Math.min(n,90); }), 250);
-    const r = await analyzePhotosWithAI(photos, cfg);
+    const r = await analyzePhotosWithAI(photos, cfg, vault.name);
     clearInterval(iv); setProg(100);
     setTimeout(() => { setResults(r); setPicked(new Set(r.filter(x=>x.aiPick).map(x=>x.id))); setStep("review"); }, 400);
   };
