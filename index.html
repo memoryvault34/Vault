@@ -659,7 +659,12 @@ function AIImport({ vault, userId, onDone, onClose }) {
     const iv = setInterval(() => setProg(p => { const n = p + Math.random()*7; if(n>=90) clearInterval(iv); return Math.min(n,90); }), 250);
     const r = await analyzePhotosWithAI(photos, cfg, vault.name);
     clearInterval(iv); setProg(100);
-    setTimeout(() => { setResults(r); setPicked(new Set(r.filter(x=>x.aiPick).map(x=>x.id))); setStep("review"); }, 400);
+    // Merge src back into results so the review screen can show photos
+    const enriched = r.map(result => {
+      const orig = photos.find(p => p.id === result.id);
+      return { ...result, src: orig?.src || result.src };
+    });
+    setTimeout(() => { setResults(enriched); setPicked(new Set(enriched.filter(x=>x.aiPick).map(x=>x.id))); setStep("review"); }, 400);
   };
 
   const finish = async () => {
