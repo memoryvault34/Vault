@@ -43,8 +43,50 @@
       --safe-top: env(safe-area-inset-top, 0px);
       --safe-bot: env(safe-area-inset-bottom, 0px);
     }
-    body { background:var(--bg1); color:var(--cream); font-family:'Raleway',sans-serif; overflow-x:hidden; }
-    #root { min-height:100vh; }
+    body { background:var(--bg1); color:var(--cream); font-family:'Raleway',sans-serif; overflow-x:hidden; transition:background 2s ease; }
+    #root { min-height:100vh; position:relative; }
+
+    /* Time-of-day ambient gradient overlay — sits behind everything, transitions smoothly */
+    body::before {
+      content:"";
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      z-index:0;
+      transition:background 3s ease, opacity 3s ease;
+      opacity:0.55;
+    }
+    body[data-tod="dawn"]::before {
+      background:radial-gradient(ellipse at 50% 0%, rgba(255,180,140,0.35) 0%, rgba(220,120,90,0.18) 30%, transparent 65%),
+                 radial-gradient(ellipse at 20% 100%, rgba(255,200,160,0.15) 0%, transparent 60%);
+    }
+    body[data-tod="morning"]::before {
+      background:radial-gradient(ellipse at 50% 0%, rgba(255,200,100,0.40) 0%, rgba(232,145,74,0.22) 30%, transparent 65%),
+                 radial-gradient(ellipse at 80% 80%, rgba(245,200,96,0.18) 0%, transparent 60%);
+    }
+    body[data-tod="midday"]::before {
+      background:radial-gradient(ellipse at 50% 0%, rgba(232,168,64,0.42) 0%, rgba(196,92,42,0.25) 30%, transparent 65%),
+                 radial-gradient(ellipse at 30% 90%, rgba(245,200,96,0.15) 0%, transparent 55%);
+    }
+    body[data-tod="golden"]::before {
+      background:radial-gradient(ellipse at 50% 10%, rgba(255,140,60,0.55) 0%, rgba(220,90,40,0.30) 30%, transparent 65%),
+                 radial-gradient(ellipse at 80% 100%, rgba(255,170,90,0.30) 0%, transparent 55%),
+                 radial-gradient(ellipse at 10% 80%, rgba(196,80,100,0.20) 0%, transparent 50%);
+      opacity:0.7;
+    }
+    body[data-tod="evening"]::before {
+      background:radial-gradient(ellipse at 50% 0%, rgba(180,100,140,0.35) 0%, rgba(140,80,120,0.20) 30%, transparent 65%),
+                 radial-gradient(ellipse at 70% 90%, rgba(255,150,80,0.20) 0%, transparent 55%);
+      opacity:0.6;
+    }
+    body[data-tod="night"]::before {
+      background:radial-gradient(ellipse at 50% 0%, rgba(80,60,120,0.20) 0%, rgba(196,92,42,0.10) 40%, transparent 70%),
+                 radial-gradient(ellipse at 30% 100%, rgba(232,168,64,0.08) 0%, transparent 60%);
+      opacity:0.45;
+    }
+
+    /* Make sure all content sits above the overlay */
+    nav, main, .fu, .fi, .si, [class*="page-"] { position:relative; z-index:1; }
     ::-webkit-scrollbar { width:3px; }
     ::-webkit-scrollbar-thumb { background:var(--sunset1); border-radius:3px; }
     input,textarea,select { font-family:inherit; outline:none; }
@@ -124,6 +166,24 @@
 <div id="root"><div style="min-height:100vh;background:#1A0F08;display:flex;align-items:center;justify-content:center;font-family:serif;color:#F5EDE0;font-size:24px;letter-spacing:0.1em;">VAULT</div></div>
 <script type="text/babel">
 const { useState, useEffect, useRef, useCallback, createContext, useContext } = React;
+
+// ── Time of day theming ───────────────────────────────────────
+function getTimeOfDay() {
+  const h = new Date().getHours();
+  if (h >= 5 && h < 8) return "dawn";
+  if (h >= 8 && h < 12) return "morning";
+  if (h >= 12 && h < 16) return "midday";
+  if (h >= 16 && h < 19) return "golden";
+  if (h >= 19 && h < 22) return "evening";
+  return "night";
+}
+
+function applyTimeOfDay() {
+  document.body.setAttribute("data-tod", getTimeOfDay());
+}
+applyTimeOfDay();
+// Update every 5 minutes
+setInterval(applyTimeOfDay, 5 * 60 * 1000);
 
 // ============================================================
 //  CONFIGURATION — REPLACE THESE WITH YOUR SUPABASE VALUES
@@ -538,10 +598,60 @@ function ConfirmModal({ title, body, confirmLabel, confirmDanger, onConfirm, onC
 // ══════════════════════════════════════════════════════════════
 //  GOLDEN THREAD
 // ══════════════════════════════════════════════════════════════
-function GoldenThread({ milestones, vaults, onVaultOpen }) {
+function GoldenThread({ milestones, vaults, memories, onVaultOpen }) {
   const [activeI, setActiveI] = useState(0);
   const refs = useRef({});
-  const sorted = [...milestones].sort((a,b) => new Date(a.milestone_date||a.date) - new Date(b.milestone_date||b.date));
+
+  // Build combined timeline events
+  const timelineEvents = [];
+
+  // Add time-bound vaults as "vault" events (with start_date)
+  vaults.forEach(v => {
+    if (v.start_date && ["travel","relationship","era"].includes(v.vault_type)) {
+      timelineEvents.push({
+        id: `vault-${v.id}`,
+        type: "vault",
+        vault: v,
+        date: v.start_date,
+        endDate: v.end_date,
+        title: v.name,
+        emoji: v.icon,
+        label: v.vault_type === "travel" ? "Trip" : v.vault_type === "relationship" ? "Love" : "Era",
+      });
+    }
+  });
+
+  // Add milestones
+  milestones.forEach(m => {
+    timelineEvents.push({
+      id: m.id,
+      type: "milestone",
+      date: m.milestone_date || m.date,
+      title: m.title,
+      emoji: m.emoji,
+      label: m.label,
+      vault_id: m.vault_id,
+    });
+  });
+
+  // Add lifelong vault memories (people/solo)
+  memories?.forEach(m => {
+    const v = vaults.find(vv => vv.id === (m.vault_id || m.vaultId));
+    if (v && ["people","solo"].includes(v.vault_type)) {
+      timelineEvents.push({
+        id: `mem-${m.id}`,
+        type: "memory",
+        date: m.memory_date || m.date,
+        title: m.title,
+        emoji: m.emoji || "📷",
+        label: v.name,
+        vault: v,
+        memory: m,
+      });
+    }
+  });
+
+  const sorted = timelineEvents.sort((a,b) => new Date(a.date) - new Date(b.date));
 
   useEffect(() => {
     const obs = new IntersectionObserver(entries => {
@@ -556,20 +666,18 @@ function GoldenThread({ milestones, vaults, onVaultOpen }) {
       <div className="thread-line" />
       <div className="thread-glow" />
       {sorted.map((ev, i) => {
-        const date = ev.milestone_date || ev.date;
-        const vaultId = ev.vault_id || ev.vaultId;
-        const vault = vaultId ? vaults.find(v => v.id === vaultId) : null;
+        const vault = ev.vault || (ev.vault_id ? vaults.find(v => v.id === ev.vault_id) : null);
         const isLeft = i % 2 === 0;
         const isActive = activeI === i;
         return (
           <div key={ev.id} data-i={i} ref={el => refs.current[i] = el}
             style={{ display:"flex", alignItems:"center", marginBottom:"56px", opacity:isActive?1:0.45, transition:"opacity 0.4s ease" }}>
             <div style={{ flex:1, paddingRight:"50px", textAlign:"right" }}>
-              {isLeft && <ThreadCard ev={ev} date={date} vault={vault} dir="right" onVaultOpen={onVaultOpen} />}
+              {isLeft && <ThreadCard ev={ev} date={ev.date} vault={vault} dir="right" onVaultOpen={onVaultOpen} />}
             </div>
             <div className={`thread-dot ${isActive?"active":""}`} />
             <div style={{ flex:1, paddingLeft:"50px" }}>
-              {!isLeft && <ThreadCard ev={ev} date={date} vault={vault} dir="left" onVaultOpen={onVaultOpen} />}
+              {!isLeft && <ThreadCard ev={ev} date={ev.date} vault={vault} dir="left" onVaultOpen={onVaultOpen} />}
             </div>
           </div>
         );
@@ -581,21 +689,29 @@ function GoldenThread({ milestones, vaults, onVaultOpen }) {
 function ThreadCard({ ev, date, vault, dir, onVaultOpen }) {
   const [h, setH] = useState(false);
   const c = vault ? vault.color : "var(--gold)";
+  const isVaultBand = ev.type === "vault";
   return (
     <div onMouseEnter={() => setH(true)} onMouseLeave={() => setH(false)}
       onClick={() => vault && onVaultOpen(vault)}
       className="thread-card"
-      style={{ display:"inline-block", maxWidth:"300px", textAlign:dir, background:h?"rgba(196,92,42,0.1)":"rgba(245,237,224,0.03)", border:`1px solid ${h?"rgba(196,92,42,0.35)":"var(--borderS)"}`, borderRadius:"14px", padding:"18px 22px", cursor:vault?"pointer":"default", transition:"all 0.3s", transform:h?`translateX(${dir==="right"?"-":""}5px)`:"none" }}>
-      <div style={{ fontFamily:"'Raleway',sans-serif", fontSize:"10px", letterSpacing:"0.18em", color:"var(--cream40)", textTransform:"uppercase", marginBottom:"5px" }}>{fmtShort(date)}</div>
+      style={{ display:"inline-block", maxWidth:"320px", textAlign:dir, background:h?`${c}1A`:isVaultBand?`${c}10`:"rgba(245,237,224,0.03)", border:`1px solid ${h?c+"66":isVaultBand?c+"40":"var(--borderS)"}`, borderRadius:"14px", padding:"18px 22px", cursor:vault?"pointer":"default", transition:"all 0.3s", transform:h?`translateX(${dir==="right"?"-":""}5px)`:"none" }}>
+      <div style={{ fontFamily:"'Raleway',sans-serif", fontSize:"10px", letterSpacing:"0.18em", color:"var(--cream40)", textTransform:"uppercase", marginBottom:"5px" }}>
+        {fmtShort(date)}{ev.endDate ? ` — ${fmtShort(ev.endDate)}` : ev.type === "vault" && !ev.endDate ? " — Present" : ""}
+      </div>
       <div style={{ display:"flex", alignItems:"center", gap:"8px", justifyContent:dir==="right"?"flex-end":"flex-start", marginBottom:"4px" }}>
         {dir === "left" && <span style={{ fontSize:"18px" }}>{ev.emoji}</span>}
-        <div className="thread-card-title" style={{ fontFamily:"'Playfair Display',serif", fontSize:"18px", fontWeight:700, color:"var(--cream)" }}>{ev.title}</div>
+        <div className="thread-card-title" style={{ fontFamily:"'Playfair Display',serif", fontSize:isVaultBand?"19px":"17px", fontWeight:700, color:"var(--cream)" }}>{ev.title}</div>
         {dir === "right" && <span style={{ fontSize:"18px" }}>{ev.emoji}</span>}
       </div>
       <div style={{ fontFamily:"'Raleway',sans-serif", fontSize:"10px", letterSpacing:"0.14em", color:c, textTransform:"uppercase", fontWeight:500 }}>{ev.label}</div>
-      {vault && (
-        <div style={{ marginTop:"10px", display:"inline-flex", alignItems:"center", gap:"6px", background:"rgba(196,92,42,0.15)", border:`1px solid ${vault.color}55`, borderRadius:"20px", padding:"5px 12px", fontSize:"11px", color:"var(--cream70)", fontFamily:"'Raleway',sans-serif" }}>
-          <span style={{ color:vault.color }}>{vault.icon}</span>{vault.name} vault →
+      {vault && ev.type !== "vault" && (
+        <div style={{ marginTop:"10px", display:"inline-flex", alignItems:"center", gap:"6px", background:`${vault.color}25`, border:`1px solid ${vault.color}55`, borderRadius:"20px", padding:"5px 12px", fontSize:"11px", color:"var(--cream70)", fontFamily:"'Raleway',sans-serif" }}>
+          <span style={{ color:vault.color }}>{vault.icon}</span>{vault.name} →
+        </div>
+      )}
+      {isVaultBand && (
+        <div style={{ marginTop:"8px", fontFamily:"'Raleway',sans-serif", fontSize:"11px", color:"var(--cream70)", fontWeight:400 }}>
+          Open vault →
         </div>
       )}
     </div>
@@ -1195,26 +1311,43 @@ function VaultCard({ vault, count, onOpen, onImport, onDelete }) {
 // ══════════════════════════════════════════════════════════════
 function Home({ user, vaults, memories, isDemo, onOpenVault, onImportVault, onNewVault, onDeleteVault, onSwitchView, onRevisitDemo }) {
   const [newVOpen, setNewVOpen] = useState(false);
-  const [nf, setNf] = useState({ name:"", icon:"◇", color:"#C45C2A" });
+  const [nf, setNf] = useState({ name:"", icon:"◇", color:"#C45C2A", vault_type:"travel", start_date:"", end_date:"" });
   const [creating, setCreating] = useState(false);
+  const [vaultStep, setVaultStep] = useState(1);
   const ICONS  = ["◇","◈","◎","⌂","✦","△","○","□"];
   const COLORS = ["#C45C2A","#D4743A","#E8914A","#F0A85C","#E8A840","#AD8060","#D4906A","#B86040"];
 
   const createVault = async () => {
     if (!nf.name) return;
+    const isTimeBound = ["travel","relationship","era"].includes(nf.vault_type);
     setCreating(true);
     try {
+      const vaultData = {
+        name:nf.name, icon:nf.icon, color:nf.color,
+        vault_type:nf.vault_type,
+        start_date: isTimeBound && nf.start_date ? nf.start_date : null,
+        end_date: isTimeBound && nf.end_date ? nf.end_date : null,
+      };
       if (isDemo) {
-        onNewVault({ id:uid(), name:nf.name, icon:nf.icon, color:nf.color, is_demo:false });
+        onNewVault({ id:uid(), ...vaultData, is_demo:false });
       } else {
-        const v = await db.createVault(user.id, { name:nf.name, icon:nf.icon, color:nf.color });
+        const v = await db.createVault(user.id, vaultData);
         if (v) onNewVault(v);
       }
     } catch(e) {
       console.error("Create vault failed:", e);
     }
-    setCreating(false); setNewVOpen(false); setNf({name:"",icon:"◇",color:"#C45C2A"});
+    setCreating(false); setNewVOpen(false); setVaultStep(1);
+    setNf({name:"",icon:"◇",color:"#C45C2A",vault_type:"travel",start_date:"",end_date:""});
   };
+
+  const VAULT_TYPES = [
+    { id:"travel", icon:"🌍", label:"Travel / Trip", desc:"A specific journey with start and end dates" },
+    { id:"relationship", icon:"❤️", label:"Relationship", desc:"A romantic partner, dating phase, marriage" },
+    { id:"era", icon:"🎓", label:"Life Era", desc:"College years, a job, a city you lived in" },
+    { id:"people", icon:"👨‍👩‍👧", label:"Person or Group", desc:"Family, friends, or anyone lifelong" },
+    { id:"solo", icon:"✨", label:"Just Me", desc:"Personal growth, hobbies, solo moments" },
+  ];
 
   return (
     <div className="page-pad" style={{ padding:"52px 48px", maxWidth:"1000px", margin:"0 auto" }}>
@@ -1277,29 +1410,78 @@ function Home({ user, vaults, memories, isDemo, onOpenVault, onImportVault, onNe
         </div>
       )}
 
-      {/* New vault modal */}
+      {/* New vault modal — multi-step */}
       {newVOpen && (
-        <Modal onClose={() => setNewVOpen(false)} maxWidth="400px">
-          <div style={{ fontFamily:"'Playfair Display',serif", fontSize:"22px", fontWeight:700, color:"var(--cream)", marginBottom:"22px" }}>Create a Vault</div>
-          <div style={{ display:"flex", flexDirection:"column", gap:"16px" }}>
-            <div><Lbl>Person or Group Name</Lbl><FInput value={nf.name} onChange={v => setNf({...nf,name:v})} placeholder="e.g. Mom, College Friends, Solo" /></div>
-            <div>
-              <Lbl>Icon</Lbl>
-              <div style={{ display:"flex", gap:"8px", flexWrap:"wrap" }}>
-                {ICONS.map(ic => <button key={ic} onClick={() => setNf({...nf,icon:ic})} style={{ width:"36px", height:"36px", borderRadius:"8px", background:nf.icon===ic?"var(--bg3)":"var(--bg1)", border:`1px solid ${nf.icon===ic?"var(--sunset3)":"var(--borderS)"}`, color:"var(--cream)", fontSize:"15px", transition:"all 0.15s" }}>{ic}</button>)}
+        <Modal onClose={() => { setNewVOpen(false); setVaultStep(1); }} maxWidth="460px">
+          {vaultStep === 1 && (
+            <>
+              <div style={{ fontFamily:"'Playfair Display',serif", fontSize:"22px", fontWeight:700, color:"var(--cream)", marginBottom:"6px" }}>What kind of vault?</div>
+              <div style={{ fontFamily:"'Raleway',sans-serif", fontSize:"13px", color:"var(--cream40)", fontWeight:300, marginBottom:"22px" }}>This helps us place it on your Life Thread.</div>
+              <div style={{ display:"flex", flexDirection:"column", gap:"10px" }}>
+                {VAULT_TYPES.map(t => (
+                  <button key={t.id} onClick={() => setNf({...nf, vault_type:t.id})}
+                    style={{ background:nf.vault_type===t.id?"rgba(196,92,42,0.15)":"var(--bg1)", border:`1px solid ${nf.vault_type===t.id?"var(--sunset3)":"var(--borderS)"}`, borderRadius:"12px", padding:"14px 16px", display:"flex", alignItems:"center", gap:"14px", textAlign:"left", transition:"all 0.2s", cursor:"pointer" }}>
+                    <span style={{ fontSize:"24px" }}>{t.icon}</span>
+                    <div style={{ flex:1 }}>
+                      <div style={{ fontFamily:"'Playfair Display',serif", fontSize:"15px", fontWeight:700, color:"var(--cream)", marginBottom:"2px" }}>{t.label}</div>
+                      <div style={{ fontFamily:"'Raleway',sans-serif", fontSize:"12px", color:"var(--cream40)", fontWeight:300, lineHeight:1.4 }}>{t.desc}</div>
+                    </div>
+                  </button>
+                ))}
               </div>
-            </div>
-            <div>
-              <Lbl>Color</Lbl>
-              <div style={{ display:"flex", gap:"8px", flexWrap:"wrap" }}>
-                {COLORS.map(c => <button key={c} onClick={() => setNf({...nf,color:c})} style={{ width:"28px", height:"28px", borderRadius:"50%", background:c, border:`2px solid ${nf.color===c?"var(--cream)":"transparent"}`, transition:"all 0.15s" }} />)}
+              <button onClick={() => setVaultStep(2)}
+                style={{ width:"100%", background:"linear-gradient(135deg,var(--sunset1),var(--sunset3))", color:"var(--cream)", border:"none", borderRadius:"10px", padding:"14px", fontFamily:"'Raleway',sans-serif", fontSize:"13px", fontWeight:600, letterSpacing:"0.1em", textTransform:"uppercase", boxShadow:"0 4px 20px rgba(196,92,42,0.4)", marginTop:"20px" }}>
+                Next →
+              </button>
+            </>
+          )}
+
+          {vaultStep === 2 && (
+            <>
+              <div style={{ fontFamily:"'Playfair Display',serif", fontSize:"22px", fontWeight:700, color:"var(--cream)", marginBottom:"22px" }}>Vault Details</div>
+              <div style={{ display:"flex", flexDirection:"column", gap:"16px" }}>
+                <div>
+                  <Lbl>Name</Lbl>
+                  <FInput value={nf.name} onChange={v => setNf({...nf,name:v})} placeholder={
+                    nf.vault_type==="travel" ? "e.g. Italy 2024, Tokyo Trip" :
+                    nf.vault_type==="relationship" ? "e.g. Askim, Marriage Years" :
+                    nf.vault_type==="era" ? "e.g. College, NYC Years, First Job" :
+                    nf.vault_type==="people" ? "e.g. Family, College Friends" :
+                    "e.g. Personal Growth, Running"
+                  } />
+                </div>
+                {["travel","relationship","era"].includes(nf.vault_type) && (
+                  <>
+                    <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"10px" }}>
+                      <div><Lbl>Start Date</Lbl><FInput type="date" value={nf.start_date} onChange={v => setNf({...nf,start_date:v})} /></div>
+                      <div><Lbl>End Date (optional)</Lbl><FInput type="date" value={nf.end_date} onChange={v => setNf({...nf,end_date:v})} /></div>
+                    </div>
+                    <div style={{ fontFamily:"'Raleway',sans-serif", fontSize:"11px", color:"var(--cream40)", fontWeight:300, lineHeight:1.6 }}>Leave end date empty if it's ongoing — like a current relationship or job.</div>
+                  </>
+                )}
+                <div>
+                  <Lbl>Icon</Lbl>
+                  <div style={{ display:"flex", gap:"8px", flexWrap:"wrap" }}>
+                    {ICONS.map(ic => <button key={ic} onClick={() => setNf({...nf,icon:ic})} style={{ width:"36px", height:"36px", borderRadius:"8px", background:nf.icon===ic?"var(--bg3)":"var(--bg1)", border:`1px solid ${nf.icon===ic?"var(--sunset3)":"var(--borderS)"}`, color:"var(--cream)", fontSize:"15px", transition:"all 0.15s" }}>{ic}</button>)}
+                  </div>
+                </div>
+                <div>
+                  <Lbl>Color</Lbl>
+                  <div style={{ display:"flex", gap:"8px", flexWrap:"wrap" }}>
+                    {COLORS.map(c => <button key={c} onClick={() => setNf({...nf,color:c})} style={{ width:"28px", height:"28px", borderRadius:"50%", background:c, border:`2px solid ${nf.color===c?"var(--cream)":"transparent"}`, transition:"all 0.15s" }} />)}
+                  </div>
+                </div>
+                <div style={{ display:"flex", gap:"10px", marginTop:"4px" }}>
+                  <button onClick={() => setVaultStep(1)}
+                    style={{ background:"transparent", border:"1px solid var(--borderS)", color:"var(--cream40)", borderRadius:"10px", padding:"14px 20px", fontFamily:"'Raleway',sans-serif", fontSize:"12px", letterSpacing:"0.1em", textTransform:"uppercase" }}>← Back</button>
+                  <button onClick={createVault} disabled={creating||!nf.name}
+                    style={{ flex:1, background:"linear-gradient(135deg,var(--sunset1),var(--sunset3))", color:"var(--cream)", border:"none", borderRadius:"10px", padding:"14px", fontFamily:"'Raleway',sans-serif", fontSize:"13px", fontWeight:600, letterSpacing:"0.1em", textTransform:"uppercase", boxShadow:"0 4px 20px rgba(196,92,42,0.4)", display:"flex", alignItems:"center", justifyContent:"center", gap:"10px" }}>
+                    {creating ? <><Spinner />Creating...</> : "Create Vault"}
+                  </button>
+                </div>
               </div>
-            </div>
-            <button onClick={createVault} disabled={creating||!nf.name}
-              style={{ background:"linear-gradient(135deg,var(--sunset1),var(--sunset3))", color:"var(--cream)", border:"none", borderRadius:"10px", padding:"14px", fontFamily:"'Raleway',sans-serif", fontSize:"13px", fontWeight:600, letterSpacing:"0.1em", textTransform:"uppercase", boxShadow:"0 4px 20px rgba(196,92,42,0.4)", marginTop:"4px", display:"flex", alignItems:"center", justifyContent:"center", gap:"10px" }}>
-              {creating ? <><Spinner />Creating...</> : "Create Vault"}
-            </button>
-          </div>
+            </>
+          )}
         </Modal>
       )}
     </div>
@@ -1546,13 +1728,13 @@ function MainApp({ user }) {
             </h2>
             <p style={{ fontFamily:"'Raleway',sans-serif", fontSize:"13px", color:"var(--cream40)", fontWeight:300, marginTop:"12px", lineHeight:1.75 }}>Every milestone. Every vault. One golden thread.</p>
           </div>
-          {milestones.length === 0 ? (
+          {milestones.length === 0 && vaults.filter(v => v.start_date).length === 0 && memories.length === 0 ? (
             <div style={{ textAlign:"center", padding:"60px 20px", color:"var(--cream40)", fontFamily:"'Raleway',sans-serif", fontWeight:300 }}>
               <div style={{ fontSize:"32px", marginBottom:"12px" }}>✦</div>
-              <div>Your life timeline will appear here once you add milestones.</div>
+              <div>Your life timeline will appear here once you create vaults or add memories.</div>
             </div>
           ) : (
-            <GoldenThread milestones={milestones} vaults={vaults} onVaultOpen={openVault} />
+            <GoldenThread milestones={milestones} vaults={vaults} memories={memories} onVaultOpen={openVault} />
           )}
         </div>
       )}
