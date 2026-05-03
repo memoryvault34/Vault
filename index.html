@@ -5,12 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="theme-color" content="#1A0F08" />
+  <meta name="theme-color" content="#0E0B0A" />
   <title>VAULT — Memory Archive</title>
   <link rel="manifest" href="manifest.json" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Raleway:wght@200;300;400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,700;9..144,900&family=Inter:wght@200;300;400;500;600;700&display=swap" rel="stylesheet" />
   <!-- Supabase JS SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <!-- React -->
@@ -22,148 +22,154 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
     :root {
-      --bg0:     #1A0F08;
-      --bg1:     #251508;
-      --bg2:     #2E1A0C;
-      --bg3:     #3A2210;
-      --sunset1: #C45C2A;
-      --sunset2: #D4743A;
-      --sunset3: #E8914A;
-      --sunset4: #F0A85C;
-      --gold:    #E8A840;
-      --gold2:   #F5C860;
-      --gold-dim:rgba(232,168,64,0.25);
-      --cream:   #F5EDE0;
-      --cream70: rgba(245,237,224,0.70);
-      --cream40: rgba(245,237,224,0.40);
-      --cream20: rgba(245,237,224,0.20);
-      --cream10: rgba(245,237,224,0.10);
-      --border:  rgba(232,168,64,0.18);
-      --borderS: rgba(245,237,224,0.10);
+      --bg:       #0E0B0A;
+      --bg1:      #131009;
+      --bg2:      #1A1410;
+      --bg3:      #221A14;
+      --bg4:      #2A201A;
+      --sunset:   #E8743C;
+      --sunset2:  #D4622A;
+      --sunset3:  #F0904E;
+      --gold:     #E8A840;
+      --gold2:    #F5C860;
+      --text:     #F5EFE8;
+      --text70:   rgba(245,239,232,0.70);
+      --text40:   rgba(245,239,232,0.40);
+      --text20:   rgba(245,239,232,0.20);
+      --text10:   rgba(245,239,232,0.10);
+      --border:   rgba(245,239,232,0.08);
+      --borderS:  rgba(245,239,232,0.14);
+      --glow:     rgba(232,116,60,0.22);
       --safe-top: env(safe-area-inset-top, 0px);
       --safe-bot: env(safe-area-inset-bottom, 0px);
     }
-    body { background:var(--bg1); color:var(--cream); font-family:'Raleway',sans-serif; overflow-x:hidden; transition:background 2s ease; }
-    #root { min-height:100vh; position:relative; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+      font-weight: 300;
+      -webkit-font-smoothing: antialiased;
+    }
+    #root { min-height: 100vh; position: relative; }
 
-    /* Time-of-day ambient gradient overlay — sits behind everything, transitions smoothly */
+    /* Ambient warmth — barely perceptible, changes with time of day */
     body::before {
-      content:"";
-      position:fixed;
-      inset:0;
-      pointer-events:none;
-      z-index:0;
-      transition:background 3s ease, opacity 3s ease;
-      opacity:0.55;
+      content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+      transition: background 3s ease, opacity 3s ease; opacity: 0.6;
     }
     body[data-tod="dawn"]::before {
-      background:radial-gradient(ellipse at 50% 0%, rgba(255,180,140,0.35) 0%, rgba(220,120,90,0.18) 30%, transparent 65%),
-                 radial-gradient(ellipse at 20% 100%, rgba(255,200,160,0.15) 0%, transparent 60%);
+      background: radial-gradient(ellipse at 50% 0%, rgba(255,160,110,0.18) 0%, transparent 55%),
+                  radial-gradient(ellipse at 20% 100%, rgba(255,180,130,0.10) 0%, transparent 60%);
     }
     body[data-tod="morning"]::before {
-      background:radial-gradient(ellipse at 50% 0%, rgba(255,200,100,0.40) 0%, rgba(232,145,74,0.22) 30%, transparent 65%),
-                 radial-gradient(ellipse at 80% 80%, rgba(245,200,96,0.18) 0%, transparent 60%);
+      background: radial-gradient(ellipse at 70% 0%, rgba(255,180,80,0.20) 0%, transparent 55%),
+                  radial-gradient(ellipse at 20% 80%, rgba(232,116,60,0.10) 0%, transparent 55%);
     }
     body[data-tod="midday"]::before {
-      background:radial-gradient(ellipse at 50% 0%, rgba(232,168,64,0.42) 0%, rgba(196,92,42,0.25) 30%, transparent 65%),
-                 radial-gradient(ellipse at 30% 90%, rgba(245,200,96,0.15) 0%, transparent 55%);
+      background: radial-gradient(ellipse at 50% 0%, rgba(232,168,64,0.18) 0%, transparent 55%),
+                  radial-gradient(ellipse at 80% 90%, rgba(196,92,42,0.08) 0%, transparent 55%);
     }
     body[data-tod="golden"]::before {
-      background:radial-gradient(ellipse at 50% 10%, rgba(255,140,60,0.55) 0%, rgba(220,90,40,0.30) 30%, transparent 65%),
-                 radial-gradient(ellipse at 80% 100%, rgba(255,170,90,0.30) 0%, transparent 55%),
-                 radial-gradient(ellipse at 10% 80%, rgba(196,80,100,0.20) 0%, transparent 50%);
-      opacity:0.7;
+      background: radial-gradient(ellipse at 80% 0%, rgba(232,116,60,0.28) 0%, transparent 50%),
+                  radial-gradient(ellipse at 20% 100%, rgba(255,140,60,0.18) 0%, transparent 55%),
+                  radial-gradient(ellipse at 50% 50%, rgba(180,60,30,0.10) 0%, transparent 60%);
+      opacity: 0.75;
     }
     body[data-tod="evening"]::before {
-      background:radial-gradient(ellipse at 50% 0%, rgba(180,100,140,0.35) 0%, rgba(140,80,120,0.20) 30%, transparent 65%),
-                 radial-gradient(ellipse at 70% 90%, rgba(255,150,80,0.20) 0%, transparent 55%);
-      opacity:0.6;
+      background: radial-gradient(ellipse at 50% 0%, rgba(160,80,120,0.18) 0%, transparent 55%),
+                  radial-gradient(ellipse at 80% 100%, rgba(232,116,60,0.14) 0%, transparent 55%);
     }
     body[data-tod="night"]::before {
-      background:radial-gradient(ellipse at 50% 0%, rgba(80,60,120,0.20) 0%, rgba(196,92,42,0.10) 40%, transparent 70%),
-                 radial-gradient(ellipse at 30% 100%, rgba(232,168,64,0.08) 0%, transparent 60%);
-      opacity:0.45;
+      background: radial-gradient(ellipse at 80% 0%, rgba(60,40,80,0.14) 0%, transparent 55%),
+                  radial-gradient(ellipse at 20% 100%, rgba(196,92,42,0.06) 0%, transparent 55%);
+      opacity: 0.5;
     }
 
-    /* Make sure all content sits above the overlay */
-    nav, main, .fu, .fi, .si, [class*="page-"] { position:relative; z-index:1; }
-    ::-webkit-scrollbar { width:3px; }
-    ::-webkit-scrollbar-thumb { background:var(--sunset1); border-radius:3px; }
-    input,textarea,select { font-family:inherit; outline:none; }
-    button { font-family:inherit; cursor:pointer; border:none; background:none; }
-    input[type="date"] { color-scheme:dark; }
-    input::placeholder  { color:var(--cream40); }
-    textarea::placeholder { color:var(--cream40); }
-    img { max-width:100%; }
+    /* All content above ambient overlay */
+    #root > * { position: relative; z-index: 1; }
 
-    @keyframes fadeUp  { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+    ::-webkit-scrollbar { width: 2px; }
+    ::-webkit-scrollbar-thumb { background: var(--sunset2); border-radius: 2px; }
+    input, textarea, select { font-family: inherit; outline: none; }
+    button { font-family: inherit; cursor: pointer; border: none; background: none; }
+    input[type="date"] { color-scheme: dark; }
+    input::placeholder { color: var(--text40); }
+    textarea::placeholder { color: var(--text40); }
+    img { max-width: 100%; }
+
+    @keyframes fadeUp  { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
     @keyframes fadeIn  { from{opacity:0} to{opacity:1} }
-    @keyframes scaleIn { from{opacity:0;transform:scale(0.94)} to{opacity:1;transform:scale(1)} }
+    @keyframes scaleIn { from{opacity:0;transform:scale(0.96)} to{opacity:1;transform:scale(1)} }
     @keyframes spin    { to{transform:rotate(360deg)} }
     @keyframes shimmer { 0%{background-position:200% center} 100%{background-position:-200% center} }
     @keyframes pulse   { 0%,100%{opacity:1} 50%{opacity:0.5} }
 
-    .fu  { animation:fadeUp  0.55s cubic-bezier(.22,.68,0,1.15) both; }
-    .fi  { animation:fadeIn  0.3s  ease both; }
-    .si  { animation:scaleIn 0.35s cubic-bezier(.22,.68,0,1.1) both; }
+    .fu  { animation: fadeUp  0.55s cubic-bezier(.22,.68,0,1.15) both; }
+    .fi  { animation: fadeIn  0.3s  ease both; }
+    .si  { animation: scaleIn 0.35s cubic-bezier(.22,.68,0,1.1) both; }
 
+    /* Sunset gradient text */
     .gold-text {
-      background:linear-gradient(90deg,var(--sunset3),var(--gold2),var(--sunset4),var(--gold));
-      background-size:200% auto;
-      -webkit-background-clip:text;
-      -webkit-text-fill-color:transparent;
-      background-clip:text;
-      animation:shimmer 5s linear infinite;
+      background: linear-gradient(135deg, #FFB47A 0%, #E8743C 50%, #C04820 100%);
+      background-size: 200% auto;
+      -webkit-background-clip: text; background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: shimmer 6s linear infinite;
     }
+
     .demo-badge {
-      display:inline-flex; align-items:center; gap:6px;
-      background:rgba(232,168,64,0.15); border:1px solid rgba(232,168,64,0.35);
-      color:var(--gold); border-radius:20px; padding:4px 12px;
-      font-size:10px; font-weight:600; letter-spacing:0.14em; text-transform:uppercase;
-      animation:pulse 2.5s ease infinite;
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(232,168,64,0.12); border: 1px solid rgba(232,168,64,0.30);
+      color: var(--gold); border-radius: 3px; padding: 5px 12px;
+      font-size: 10px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase;
+      animation: pulse 2.5s ease infinite;
     }
+
+    /* Life Thread */
     .thread-line {
-      position:absolute; left:50%; top:0; bottom:0; width:2px;
-      transform:translateX(-50%);
-      background:linear-gradient(to bottom,transparent 0%,var(--sunset2) 8%,var(--gold) 30%,var(--sunset3) 50%,var(--gold) 70%,var(--sunset2) 92%,transparent 100%);
-      opacity:0.5;
+      position: absolute; left: 50%; top: 0; bottom: 0; width: 1px;
+      transform: translateX(-50%);
+      background: linear-gradient(to bottom, transparent 0%, var(--sunset2) 10%, var(--gold) 30%, var(--sunset) 50%, var(--gold) 70%, var(--sunset2) 90%, transparent 100%);
+      opacity: 0.35;
     }
     .thread-glow {
-      position:absolute; left:50%; top:0; bottom:0; width:6px;
-      transform:translateX(-50%);
-      background:linear-gradient(to bottom,transparent,var(--sunset3) 20%,var(--gold2) 50%,var(--sunset3) 80%,transparent);
-      filter:blur(6px); opacity:0.25;
+      position: absolute; left: 50%; top: 0; bottom: 0; width: 8px;
+      transform: translateX(-50%);
+      background: linear-gradient(to bottom, transparent, var(--sunset) 20%, var(--gold2) 50%, var(--sunset) 80%, transparent);
+      filter: blur(8px); opacity: 0.15;
     }
     .thread-dot {
-      width:13px; height:13px; border-radius:50%;
-      background:var(--gold);
-      box-shadow:0 0 0 3px var(--bg1),0 0 0 5px var(--gold-dim),0 0 16px var(--sunset3);
-      flex-shrink:0; transition:all 0.35s ease;
+      width: 10px; height: 10px; border-radius: 50%;
+      background: var(--gold); flex-shrink: 0;
+      box-shadow: 0 0 0 3px var(--bg), 0 0 0 4px rgba(232,168,64,0.3), 0 0 16px var(--sunset);
+      transition: all 0.35s ease;
     }
     .thread-dot.active {
-      width:17px; height:17px; background:var(--gold2);
-      box-shadow:0 0 0 3px var(--bg1),0 0 0 6px rgba(232,168,64,0.5),0 0 28px var(--gold);
+      width: 14px; height: 14px; background: var(--gold2);
+      box-shadow: 0 0 0 3px var(--bg), 0 0 0 5px rgba(232,168,64,0.4), 0 0 28px var(--gold);
     }
-    /* Mobile responsive */
+
+    /* Mobile */
     @media (max-width:600px) {
-      .desktop-only { display:none !important; }
-      .nav-pad { padding:14px 20px !important; }
-      .page-pad { padding:32px 20px !important; }
-      .vault-grid { grid-template-columns:1fr !important; }
-      .thread-container { padding:40px 0 80px !important; }
-      .thread-card { max-width:140px !important; padding:12px 14px !important; }
-      .thread-card-title { font-size:14px !important; }
-      .vault-header { padding:24px 20px 20px !important; }
-      .vault-actions { gap:6px !important; }
-      .vault-actions button { padding:8px 10px !important; font-size:10px !important; }
-      .mem-timeline { padding:20px 20px 60px !important; }
-      .add-form { margin:16px 20px !important; }
-      .collage-grid { grid-template-rows:repeat(2,130px) !important; }
+      .desktop-only { display: none !important; }
+      .nav-pad { padding: 14px 20px !important; }
+      .page-pad { padding: 32px 20px !important; }
+      .vault-grid { grid-template-columns: 1fr !important; }
+      .thread-container { padding: 40px 0 80px !important; }
+      .thread-card { max-width: 140px !important; padding: 12px 14px !important; }
+      .thread-card-title { font-size: 14px !important; }
+      .vault-header { padding: 24px 20px 20px !important; }
+      .vault-actions { gap: 6px !important; }
+      .vault-actions button { padding: 8px 10px !important; font-size: 10px !important; }
+      .mem-timeline { padding: 20px 20px 60px !important; }
+      .add-form { margin: 16px 20px !important; }
+      .collage-grid { grid-template-rows: repeat(2,130px) !important; }
     }
   </style>
 </head>
 <body>
-<div id="root"><div style="min-height:100vh;background:#1A0F08;display:flex;align-items:center;justify-content:center;font-family:serif;color:#F5EDE0;font-size:24px;letter-spacing:0.1em;">VAULT</div></div>
+<div id="root"><div style="min-height:100vh;background:#0E0B0A;display:flex;align-items:center;justify-content:center;font-family:'Inter',sans-serif;color:#F5EFE8;font-size:18px;letter-spacing:0.35em;font-weight:300;">VAULT</div></div>
 <script type="text/babel">
 const { useState, useEffect, useRef, useCallback, createContext, useContext } = React;
 
@@ -336,16 +342,16 @@ async function analyzePhotosWithAI(photos, cfg, vaultName) {
 }
 // ── Shared UI atoms ───────────────────────────────────────────
 function Lbl({ children }) {
-  return <div style={{ fontFamily:"'Raleway',sans-serif", fontSize:"10px", letterSpacing:"0.16em", textTransform:"uppercase", color:"var(--cream40)", marginBottom:"8px" }}>{children}</div>;
+  return <div style={{ fontFamily:"'Inter',sans-serif", fontSize:"10px", letterSpacing:"0.22em", textTransform:"uppercase", color:"var(--text40)", marginBottom:"8px", fontWeight:500 }}>{children}</div>;
 }
 function FInput({ value, onChange, placeholder, type="text", disabled }) {
   return (
     <input type={type} value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} disabled={disabled}
-      style={{ width:"100%", background:"var(--bg2)", border:"1px solid var(--borderS)", borderRadius:"10px", padding:"12px 16px", color:"var(--cream)", fontSize:"13px", fontFamily:"'Raleway',sans-serif", fontWeight:300, opacity:disabled?0.5:1 }} />
+      style={{ width:"100%", background:"var(--bg3)", border:"1px solid var(--border)", borderRadius:"6px", padding:"12px 16px", color:"var(--text)", fontSize:"13px", fontFamily:"'Inter',sans-serif", fontWeight:300, opacity:disabled?0.5:1, transition:"border-color 0.2s" }} />
   );
 }
-function Spinner({ size=14, color="var(--cream)" }) {
-  return <div style={{ width:`${size}px`, height:`${size}px`, border:`2px solid ${color}`, borderTopColor:"transparent", borderRadius:"50%", animation:"spin 0.7s linear infinite", flexShrink:0 }} />;
+function Spinner({ size=14, color="var(--text)" }) {
+  return <div style={{ width:`${size}px`, height:`${size}px`, border:`1.5px solid ${color}`, borderTopColor:"transparent", borderRadius:"50%", animation:"spin 0.7s linear infinite", flexShrink:0 }} />;
 }
 function Modal({ onClose, children, maxWidth="480px" }) {
   useEffect(() => {
@@ -354,8 +360,8 @@ function Modal({ onClose, children, maxWidth="480px" }) {
     return () => window.removeEventListener("keydown", fn);
   }, [onClose]);
   return (
-    <div className="fi" onClick={onClose} style={{ position:"fixed", inset:0, background:"rgba(10,4,0,0.88)", backdropFilter:"blur(14px)", zIndex:200, display:"flex", alignItems:"center", justifyContent:"center", padding:"20px" }}>
-      <div className="si" onClick={e => e.stopPropagation()} style={{ background:"var(--bg2)", border:"1px solid var(--border)", borderRadius:"22px", padding:"32px", width:"100%", maxWidth, maxHeight:"90vh", overflowY:"auto" }}>
+    <div className="fi" onClick={onClose} style={{ position:"fixed", inset:0, background:"rgba(8,5,4,0.92)", backdropFilter:"blur(20px)", zIndex:200, display:"flex", alignItems:"center", justifyContent:"center", padding:"20px" }}>
+      <div className="si" onClick={e => e.stopPropagation()} style={{ background:"var(--bg2)", border:"1px solid var(--borderS)", borderRadius:"12px", padding:"32px", width:"100%", maxWidth, maxHeight:"90vh", overflowY:"auto" }}>
         {children}
       </div>
     </div>
@@ -363,9 +369,9 @@ function Modal({ onClose, children, maxWidth="480px" }) {
 }
 function Toast({ message, type="success", onDone }) {
   useEffect(() => { const t = setTimeout(onDone, 3000); return () => clearTimeout(t); }, [onDone]);
-  const bg = type === "error" ? "rgba(200,60,60,0.9)" : "rgba(196,92,42,0.9)";
+  const bg = type === "error" ? "rgba(180,50,50,0.95)" : "rgba(232,116,60,0.95)";
   return (
-    <div style={{ position:"fixed", bottom:"24px", left:"50%", transform:"translateX(-50%)", background:bg, color:"var(--cream)", borderRadius:"10px", padding:"12px 24px", fontFamily:"'Raleway',sans-serif", fontSize:"13px", fontWeight:500, zIndex:999, whiteSpace:"nowrap", boxShadow:"0 8px 24px rgba(0,0,0,0.4)", animation:"fadeUp 0.3s ease both" }}>
+    <div style={{ position:"fixed", bottom:"24px", left:"50%", transform:"translateX(-50%)", background:bg, color:"#fff", borderRadius:"6px", padding:"12px 24px", fontFamily:"'Inter',sans-serif", fontSize:"13px", fontWeight:500, zIndex:999, whiteSpace:"nowrap", boxShadow:"0 8px 32px rgba(0,0,0,0.5)", animation:"fadeUp 0.3s ease both", letterSpacing:"0.02em" }}>
       {message}
     </div>
   );
@@ -445,34 +451,34 @@ function Auth({ onAuth }) {
   );
 
   if (screen === "land") return (
-    <div className="fi" style={{ minHeight:"100vh", background:"var(--bg0)", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"40px 24px", position:"relative", overflow:"hidden" }}>
-      <div style={{ position:"absolute", top:"-10%", left:"50%", transform:"translateX(-50%)", width:"700px", height:"500px", borderRadius:"50%", background:"radial-gradient(ellipse,rgba(196,92,42,0.35) 0%,rgba(212,116,58,0.18) 40%,transparent 70%)", filter:"blur(40px)", pointerEvents:"none" }} />
-      <div style={{ position:"absolute", bottom:"5%", left:"20%", width:"400px", height:"300px", borderRadius:"50%", background:"radial-gradient(ellipse,rgba(232,168,64,0.2) 0%,transparent 70%)", filter:"blur(50px)", pointerEvents:"none" }} />
-      <div className="fu" style={{ textAlign:"center", maxWidth:"540px", position:"relative" }}>
-        <div style={{ fontFamily:"'Raleway',sans-serif", fontSize:"11px", letterSpacing:"0.38em", color:"var(--sunset3)", textTransform:"uppercase", marginBottom:"22px" }}>Memory Archive</div>
-        <h1 style={{ fontFamily:"'Playfair Display',serif", fontSize:"clamp(72px,14vw,110px)", fontWeight:900, lineHeight:0.88, letterSpacing:"-0.03em", marginBottom:"30px" }}>
+    <div className="fi" style={{ minHeight:"100vh", background:"var(--bg)", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"40px 24px", position:"relative", overflow:"hidden" }}>
+      <div style={{ position:"absolute", top:"-5%", right:"10%", width:"600px", height:"600px", borderRadius:"50%", background:"radial-gradient(ellipse,rgba(232,116,60,0.18) 0%,transparent 70%)", filter:"blur(60px)", pointerEvents:"none" }} />
+      <div style={{ position:"absolute", bottom:"10%", left:"5%", width:"400px", height:"400px", borderRadius:"50%", background:"radial-gradient(ellipse,rgba(180,60,20,0.12) 0%,transparent 70%)", filter:"blur(60px)", pointerEvents:"none" }} />
+      <div className="fu" style={{ textAlign:"center", maxWidth:"560px", position:"relative" }}>
+        <div style={{ fontFamily:"'Inter',sans-serif", fontSize:"10px", letterSpacing:"0.38em", color:"var(--sunset)", textTransform:"uppercase", marginBottom:"32px", fontWeight:600 }}>Memory Archive</div>
+        <h1 style={{ fontFamily:"'Fraunces',serif", fontSize:"clamp(80px,14vw,130px)", fontWeight:300, lineHeight:0.88, letterSpacing:"-0.04em", marginBottom:"36px" }}>
           <span className="gold-text">VAULT</span>
         </h1>
-        <p style={{ fontFamily:"'Raleway',sans-serif", fontSize:"16px", fontWeight:300, color:"var(--cream70)", lineHeight:1.85, marginBottom:"16px" }}>
-          Create a timeline of your life<br/>through your camera roll.
+        <p style={{ fontFamily:"'Fraunces',serif", fontSize:"22px", fontWeight:300, color:"var(--text70)", lineHeight:1.6, marginBottom:"16px" }}>
+          Your life, in chapters.
         </p>
-        <p style={{ fontFamily:"'Playfair Display',serif", fontSize:"15px", fontStyle:"italic", color:"var(--sunset4)", marginBottom:"52px" }}>
-          Your memories, beautifully preserved.
+        <p style={{ fontFamily:"'Inter',sans-serif", fontSize:"14px", fontWeight:300, color:"var(--text40)", lineHeight:1.8, marginBottom:"56px" }}>
+          Transform your camera roll into a curated archive<br/>of the moments that shaped who you are.
         </p>
         <div style={{ display:"flex", gap:"14px", justifyContent:"center", flexWrap:"wrap" }}>
           <button onClick={() => setScreen("signup")}
-            style={{ background:"linear-gradient(135deg,var(--sunset1),var(--sunset3))", color:"var(--cream)", border:"none", borderRadius:"40px", padding:"16px 40px", fontFamily:"'Raleway',sans-serif", fontSize:"13px", fontWeight:600, letterSpacing:"0.14em", textTransform:"uppercase", boxShadow:"0 8px 32px rgba(196,92,42,0.45)", transition:"all 0.25s" }}>
+            style={{ background:"var(--text)", color:"var(--bg)", border:"none", borderRadius:"60px", padding:"16px 44px", fontFamily:"'Inter',sans-serif", fontSize:"13px", fontWeight:600, letterSpacing:"0.12em", textTransform:"uppercase", boxShadow:"0 8px 32px rgba(245,239,232,0.12)", transition:"all 0.25s" }}>
             Create Your Vault
           </button>
           <button onClick={() => setScreen("login")}
-            style={{ background:"transparent", color:"var(--cream70)", border:"1px solid rgba(245,237,224,0.25)", borderRadius:"40px", padding:"16px 40px", fontFamily:"'Raleway',sans-serif", fontSize:"13px", fontWeight:400, letterSpacing:"0.14em", textTransform:"uppercase", transition:"all 0.25s" }}>
+            style={{ background:"transparent", color:"var(--text70)", border:"1px solid var(--borderS)", borderRadius:"60px", padding:"16px 44px", fontFamily:"'Inter',sans-serif", fontSize:"13px", fontWeight:400, letterSpacing:"0.12em", textTransform:"uppercase", transition:"all 0.25s" }}>
             Sign In
           </button>
         </div>
       </div>
-      <div style={{ position:"absolute", bottom:0, left:"50%", transform:"translateX(-50%)", display:"flex", flexDirection:"column", alignItems:"center", gap:"8px", paddingBottom:"20px" }}>
-        <div style={{ fontFamily:"'Raleway',sans-serif", fontSize:"10px", letterSpacing:"0.2em", color:"var(--cream40)", textTransform:"uppercase" }}>Scroll your story</div>
-        <div style={{ width:"1px", height:"60px", background:"linear-gradient(to bottom,var(--gold),transparent)" }} />
+      <div style={{ position:"absolute", bottom:0, left:"50%", transform:"translateX(-50%)", display:"flex", flexDirection:"column", alignItems:"center", gap:"10px", paddingBottom:"24px" }}>
+        <div style={{ fontFamily:"'Inter',sans-serif", fontSize:"9px", letterSpacing:"0.3em", color:"var(--text20)", textTransform:"uppercase" }}>Vol. I · MMXXVI</div>
+        <div style={{ width:"1px", height:"50px", background:"linear-gradient(to bottom,var(--sunset),transparent)" }} />
       </div>
     </div>
   );
@@ -560,14 +566,14 @@ function DemoBanner({ onExitDemo }) {
   const [show, setShow] = useState(true);
   if (!show) return null;
   return (
-    <div style={{ background:"linear-gradient(90deg,rgba(196,92,42,0.25),rgba(232,168,64,0.15))", borderBottom:"1px solid rgba(232,168,64,0.25)", padding:"10px 24px", display:"flex", alignItems:"center", justifyContent:"space-between", flexWrap:"wrap", gap:"12px" }}>
+    <div style={{ background:"rgba(232,116,60,0.08)", borderBottom:"1px solid rgba(232,116,60,0.18)", padding:"10px 48px", display:"flex", alignItems:"center", justifyContent:"space-between", flexWrap:"wrap", gap:"12px" }}>
       <div style={{ display:"flex", alignItems:"center", gap:"12px" }}>
         <span className="demo-badge">✦ Demo</span>
-        <span style={{ fontFamily:"'Raleway',sans-serif", fontSize:"13px", color:"var(--cream70)", fontWeight:300 }}>Explore a sample vault to see what's possible.</span>
+        <span style={{ fontFamily:"'Inter',sans-serif", fontSize:"13px", color:"var(--text70)", fontWeight:300 }}>Explore a sample vault to see what's possible.</span>
       </div>
       <div style={{ display:"flex", gap:"10px", flexShrink:0 }}>
-        <button onClick={() => setShow(false)} style={{ color:"var(--cream40)", fontFamily:"'Raleway',sans-serif", fontSize:"12px", fontWeight:300 }}>Dismiss</button>
-        <button onClick={onExitDemo} style={{ background:"linear-gradient(135deg,var(--sunset1),var(--sunset3))", color:"var(--cream)", border:"none", borderRadius:"8px", padding:"8px 18px", fontFamily:"'Raleway',sans-serif", fontSize:"12px", fontWeight:600, letterSpacing:"0.1em", textTransform:"uppercase", boxShadow:"0 2px 12px rgba(196,92,42,0.4)" }}>
+        <button onClick={() => setShow(false)} style={{ color:"var(--text40)", fontFamily:"'Inter',sans-serif", fontSize:"12px", fontWeight:300 }}>Dismiss</button>
+        <button onClick={onExitDemo} style={{ background:"var(--text)", color:"var(--bg)", border:"none", borderRadius:"60px", padding:"8px 20px", fontFamily:"'Inter',sans-serif", fontSize:"11px", fontWeight:600, letterSpacing:"0.12em", textTransform:"uppercase" }}>
           Start My Vault →
         </button>
       </div>
@@ -582,11 +588,11 @@ function ConfirmModal({ title, body, confirmLabel, confirmDanger, onConfirm, onC
   return (
     <Modal onClose={onCancel} maxWidth="400px">
       <div style={{ textAlign:"center" }}>
-        <div style={{ fontFamily:"'Playfair Display',serif", fontSize:"22px", fontWeight:700, color:"var(--cream)", marginBottom:"10px" }}>{title}</div>
-        <div style={{ fontFamily:"'Raleway',sans-serif", fontSize:"13px", color:"var(--cream40)", fontWeight:300, lineHeight:1.75, marginBottom:"26px" }}>{body}</div>
+        <div style={{ fontFamily:"'Fraunces',serif", fontSize:"22px", fontWeight:400, color:"var(--text)", marginBottom:"10px" }}>{title}</div>
+        <div style={{ fontFamily:"'Inter',sans-serif", fontSize:"13px", color:"var(--text40)", fontWeight:300, lineHeight:1.75, marginBottom:"26px" }}>{body}</div>
         <div style={{ display:"flex", gap:"12px", justifyContent:"center" }}>
-          <button onClick={onCancel} style={{ background:"transparent", border:"1px solid var(--borderS)", color:"var(--cream40)", borderRadius:"10px", padding:"11px 22px", fontFamily:"'Raleway',sans-serif", fontSize:"12px", letterSpacing:"0.1em", textTransform:"uppercase" }}>Cancel</button>
-          <button onClick={onConfirm} style={{ background:confirmDanger?"rgba(200,60,60,0.2)":"linear-gradient(135deg,var(--sunset1),var(--sunset3))", border:confirmDanger?"1px solid rgba(200,60,60,0.4)":"none", color:confirmDanger?"#F08080":"var(--cream)", borderRadius:"10px", padding:"11px 22px", fontFamily:"'Raleway',sans-serif", fontSize:"12px", fontWeight:600, letterSpacing:"0.1em", textTransform:"uppercase" }}>
+          <button onClick={onCancel} style={{ background:"transparent", border:"1px solid var(--border)", color:"var(--text40)", borderRadius:"60px", padding:"11px 22px", fontFamily:"'Inter',sans-serif", fontSize:"11px", letterSpacing:"0.14em", textTransform:"uppercase", fontWeight:500 }}>Cancel</button>
+          <button onClick={onConfirm} style={{ background:confirmDanger?"rgba(180,50,50,0.15)":"var(--text)", border:confirmDanger?"1px solid rgba(180,50,50,0.4)":"none", color:confirmDanger?"#F08080":"var(--bg)", borderRadius:"60px", padding:"11px 22px", fontFamily:"'Inter',sans-serif", fontSize:"11px", fontWeight:600, letterSpacing:"0.14em", textTransform:"uppercase" }}>
             {confirmLabel}
           </button>
         </div>
@@ -1271,25 +1277,38 @@ function VaultCard({ vault, count, onOpen, onImport, onDelete }) {
   return (
     <>
       <div onMouseEnter={() => setH(true)} onMouseLeave={() => setH(false)}
-        style={{ background:h?"rgba(196,92,42,0.07)":"var(--bg2)", border:`1px solid ${h?"rgba(196,92,42,0.3)":"var(--borderS)"}`, borderRadius:"18px", padding:"24px 26px", transition:"all 0.3s", transform:h?"translateY(-3px)":"none", position:"relative", overflow:"hidden", height:"100%" }}>
-        <div style={{ position:"absolute", top:0, left:0, right:0, height:"2px", background:`linear-gradient(90deg,${vault.color},transparent)`, opacity:h?1:0.4, transition:"opacity 0.3s" }} />
+        style={{ position:"relative", background:h?"var(--bg3)":"var(--bg2)", border:`1px solid ${h?vault.color+"55":"var(--border)"}`, borderRadius:"4px", padding:"26px", transition:"all 0.35s", transform:h?"translateY(-5px)":"none", height:"100%", minHeight:"200px", overflow:"hidden", display:"flex", flexDirection:"column", justifyContent:"space-between" }}>
+        {/* Top color accent */}
+        <div style={{ position:"absolute", top:0, left:0, right:0, height:"1.5px", background:`linear-gradient(90deg,${vault.color},transparent)`, opacity:h?1:0.5, transition:"opacity 0.3s" }} />
+        {/* Delete button */}
         <button onClick={e => { e.stopPropagation(); setConfirmDel(true); }}
-          style={{ position:"absolute", top:"12px", right:"12px", width:"26px", height:"26px", borderRadius:"50%", background:"rgba(200,60,60,0.0)", border:"1px solid transparent", color:"rgba(245,237,224,0.2)", fontSize:"13px", display:"flex", alignItems:"center", justifyContent:"center", transition:"all 0.2s", lineHeight:1 }}
-          onMouseEnter={e => { e.currentTarget.style.background="rgba(200,60,60,0.15)"; e.currentTarget.style.borderColor="rgba(200,60,60,0.3)"; e.currentTarget.style.color="#F08080"; }}
-          onMouseLeave={e => { e.currentTarget.style.background="rgba(200,60,60,0)"; e.currentTarget.style.borderColor="transparent"; e.currentTarget.style.color="rgba(245,237,224,0.2)"; }}>✕</button>
-        <div style={{ display:"flex", justifyContent:"space-between", marginBottom:"12px", paddingRight:"18px" }}>
-          <div style={{ fontFamily:"'Raleway',sans-serif", fontSize:"11px", letterSpacing:"0.2em", color:vault.color, textTransform:"uppercase" }}>{vault.icon} Vault</div>
-          <div style={{ fontFamily:"'Playfair Display',serif", fontSize:"24px", fontWeight:300, color:vault.color, opacity:0.45 }}>{count}</div>
+          style={{ position:"absolute", top:"14px", right:"14px", width:"24px", height:"24px", borderRadius:"50%", background:"transparent", border:"1px solid transparent", color:"var(--text20)", fontSize:"12px", display:"flex", alignItems:"center", justifyContent:"center", transition:"all 0.2s" }}
+          onMouseEnter={e => { e.currentTarget.style.background="rgba(180,50,50,0.12)"; e.currentTarget.style.borderColor="rgba(180,50,50,0.3)"; e.currentTarget.style.color="#F08080"; }}
+          onMouseLeave={e => { e.currentTarget.style.background="transparent"; e.currentTarget.style.borderColor="transparent"; e.currentTarget.style.color="var(--text20)"; }}>✕</button>
+        {/* Content */}
+        <div>
+          <div style={{ fontFamily:"'Inter',sans-serif", fontSize:"9px", letterSpacing:"0.28em", color:vault.color, textTransform:"uppercase", marginBottom:"16px", fontWeight:600, display:"flex", alignItems:"center", gap:"8px" }}>
+            <span>{vault.icon}</span>
+            {vault.vault_type || "Vault"}
+          </div>
+          <div style={{ fontFamily:"'Fraunces',serif", fontSize:"26px", fontWeight:400, color:"var(--text)", marginBottom:"6px", lineHeight:1.1, letterSpacing:"-0.01em", paddingRight:"20px" }}>{vault.name}</div>
+          <div style={{ fontFamily:"'Inter',sans-serif", fontSize:"12px", color:"var(--text40)", fontWeight:300 }}>
+            {count} {count===1?"memory":"memories"}
+            {vault.start_date && <span style={{ marginLeft:"10px", color:vault.color+"99" }}>· {fmtShort(vault.start_date)}{vault.end_date ? ` — ${fmtShort(vault.end_date)}` : " — Present"}</span>}
+          </div>
         </div>
-        <div style={{ fontFamily:"'Playfair Display',serif", fontSize:"24px", fontWeight:700, color:"var(--cream)", marginBottom:"4px" }}>{vault.name}</div>
-        <div style={{ fontFamily:"'Raleway',sans-serif", fontSize:"12px", color:"var(--cream40)", fontWeight:300, marginBottom:"18px" }}>{count} {count===1?"memory":"memories"}</div>
-        <div style={{ display:"flex", gap:"8px" }}>
-          <button onClick={onOpen} style={{ flex:1, background:"var(--cream10)", border:"1px solid var(--borderS)", color:"var(--cream70)", borderRadius:"8px", padding:"9px 10px", fontFamily:"'Raleway',sans-serif", fontSize:"11px", letterSpacing:"0.1em", textTransform:"uppercase", transition:"all 0.2s" }}
-            onMouseEnter={e => e.target.style.color="var(--cream)"}
-            onMouseLeave={e => e.target.style.color="var(--cream70)"}>Open</button>
-          <button onClick={e => { e.stopPropagation(); onImport(); }} style={{ background:`${vault.color}25`, border:`1px solid ${vault.color}60`, color:vault.color, borderRadius:"8px", padding:"9px 12px", fontFamily:"'Raleway',sans-serif", fontSize:"11px", letterSpacing:"0.1em", textTransform:"uppercase", transition:"all 0.2s" }}
-            onMouseEnter={e => { e.target.style.background=vault.color; e.target.style.color="var(--bg0)"; }}
-            onMouseLeave={e => { e.target.style.background=`${vault.color}25`; e.target.style.color=vault.color; }}>AI Import</button>
+        {/* Actions */}
+        <div style={{ display:"flex", gap:"8px", marginTop:"20px" }}>
+          <button onClick={onOpen}
+            style={{ flex:1, background:"var(--text)", color:"var(--bg)", border:"none", borderRadius:"60px", padding:"10px 14px", fontFamily:"'Inter',sans-serif", fontSize:"10px", fontWeight:600, letterSpacing:"0.14em", textTransform:"uppercase", transition:"all 0.2s" }}>
+            Open
+          </button>
+          <button onClick={e => { e.stopPropagation(); onImport(); }}
+            style={{ background:`${vault.color}18`, border:`1px solid ${vault.color}44`, color:vault.color, borderRadius:"60px", padding:"10px 14px", fontFamily:"'Inter',sans-serif", fontSize:"10px", fontWeight:600, letterSpacing:"0.12em", textTransform:"uppercase", transition:"all 0.2s" }}
+            onMouseEnter={e => { e.currentTarget.style.background=vault.color; e.currentTarget.style.color="var(--bg)"; }}
+            onMouseLeave={e => { e.currentTarget.style.background=`${vault.color}18`; e.currentTarget.style.color=vault.color; }}>
+            AI Import
+          </button>
         </div>
       </div>
       {confirmDel && (
@@ -1350,87 +1369,126 @@ function Home({ user, vaults, memories, isDemo, onOpenVault, onImportVault, onNe
   ];
 
   return (
-    <div className="page-pad" style={{ padding:"52px 48px", maxWidth:"1000px", margin:"0 auto" }}>
-      <div className="fu" style={{ marginBottom:"48px" }}>
-        <div style={{ fontFamily:"'Raleway',sans-serif", fontSize:"11px", letterSpacing:"0.32em", color:"var(--sunset3)", textTransform:"uppercase", marginBottom:"12px" }}>✦ Your Archive</div>
-        <h1 style={{ fontFamily:"'Playfair Display',serif", fontSize:"clamp(44px,6vw,72px)", fontWeight:900, color:"var(--cream)", lineHeight:0.92, letterSpacing:"-0.025em" }}>
-          {user.name}'s<br/><span className="gold-text">Vault</span>
-        </h1>
-        <p style={{ fontFamily:"'Raleway',sans-serif", fontSize:"14px", color:"var(--cream40)", fontWeight:300, marginTop:"14px", lineHeight:1.75 }}>
-          {isDemo ? <span><span className="demo-badge" style={{ animation:"none", marginRight:"8px" }}>Demo</span></span> : null}
-          {memories.length} memor{memories.length===1?"y":"ies"} across {vaults.length} vault{vaults.length!==1?"s":""}
-        </p>
-      </div>
+    <div style={{ maxWidth:"1400px", margin:"0 auto", padding:"52px 48px" }}>
 
-      {/* Life Thread Banner */}
-      <div className="fu" style={{ animationDelay:"0.08s", marginBottom:"36px" }}>
-        <div onClick={onSwitchView} style={{ background:"linear-gradient(135deg,rgba(196,92,42,0.15) 0%,rgba(232,168,64,0.08) 100%)", border:"1px solid var(--border)", borderRadius:"18px", padding:"24px 30px", display:"flex", justifyContent:"space-between", alignItems:"center", transition:"all 0.3s", cursor:"pointer" }}
-          onMouseEnter={e => e.currentTarget.style.background="linear-gradient(135deg,rgba(196,92,42,0.22) 0%,rgba(232,168,64,0.12) 100%)"}
-          onMouseLeave={e => e.currentTarget.style.background="linear-gradient(135deg,rgba(196,92,42,0.15) 0%,rgba(232,168,64,0.08) 100%)"}>
-          <div>
-            <div style={{ fontFamily:"'Raleway',sans-serif", fontSize:"10px", letterSpacing:"0.24em", color:"var(--gold)", textTransform:"uppercase", marginBottom:"6px" }}>✦ &nbsp;Golden Thread</div>
-            <div style={{ fontFamily:"'Playfair Display',serif", fontSize:"24px", fontWeight:900, color:"var(--cream)" }}>Your Life Timeline</div>
-            <div style={{ fontFamily:"'Raleway',sans-serif", fontSize:"13px", color:"var(--cream40)", fontWeight:300, marginTop:"4px" }}>Every vault woven into one scrollable story</div>
-          </div>
-          <div style={{ fontFamily:"'Playfair Display',serif", fontSize:"32px", color:"var(--gold)", opacity:0.5 }}>→</div>
+      {/* Hero */}
+      <div className="fu" style={{ marginBottom:"64px", paddingBottom:"48px", borderBottom:"1px solid var(--border)" }}>
+        <div style={{ fontFamily:"'Inter',sans-serif", fontSize:"10px", letterSpacing:"0.38em", color:"var(--sunset)", textTransform:"uppercase", marginBottom:"28px", fontWeight:600, display:"flex", alignItems:"center", gap:"10px" }}>
+          <span style={{ width:"6px", height:"6px", borderRadius:"50%", background:"var(--sunset)", boxShadow:"0 0 10px var(--sunset)", display:"inline-block" }}></span>
+          {isDemo ? "Demo Archive" : "Your Archive"}
+        </div>
+        <h1 style={{ fontFamily:"'Fraunces',serif", fontSize:"clamp(52px,7vw,96px)", fontWeight:300, color:"var(--text)", lineHeight:0.92, letterSpacing:"-0.04em", marginBottom:"28px" }}>
+          {user.name}'s<br/><span className="gold-text">archive.</span>
+        </h1>
+        <div style={{ display:"flex", gap:"40px", fontFamily:"'Inter',sans-serif", fontSize:"13px", color:"var(--text40)", fontWeight:400 }}>
+          <div><span style={{ color:"var(--text)", fontWeight:600, marginRight:"6px" }}>{memories.length}</span>memories</div>
+          <div><span style={{ color:"var(--text)", fontWeight:600, marginRight:"6px" }}>{vaults.length}</span>vaults</div>
+          {isDemo && <span className="demo-badge" style={{ animation:"none" }}>Demo Mode</span>}
         </div>
       </div>
 
+      {/* Featured vault — first vault with a photo */}
+      {(() => {
+        const featured = vaults.find(v => memories.some(m => (m.vault_id||m.vaultId)===v.id && m.photo_url));
+        if (!featured) return null;
+        const featuredMem = memories.find(m => (m.vault_id||m.vaultId)===featured.id && m.photo_url);
+        const featuredCount = memories.filter(m => (m.vault_id||m.vaultId)===featured.id).length;
+        return (
+          <div className="fu" style={{ animationDelay:"0.05s", marginBottom:"64px" }}>
+            <div onClick={() => onOpenVault(featured)}
+              style={{ position:"relative", height:"480px", borderRadius:"4px", overflow:"hidden", cursor:"pointer" }}>
+              <div style={{ position:"absolute", inset:0, backgroundImage:`url(${featuredMem.photo_url})`, backgroundSize:"cover", backgroundPosition:"center", transform:"scale(1.02)", transition:"transform 8s ease" }} />
+              <div style={{ position:"absolute", inset:0, background:"linear-gradient(180deg, rgba(14,11,10,0.1) 0%, rgba(14,11,10,0.0) 35%, rgba(14,11,10,0.96) 100%)" }} />
+              <div style={{ position:"absolute", bottom:"40px", left:"40px", right:"40px" }}>
+                <div style={{ display:"inline-block", fontFamily:"'Inter',sans-serif", fontSize:"10px", letterSpacing:"0.28em", textTransform:"uppercase", color:"var(--text70)", background:"rgba(14,11,10,0.5)", backdropFilter:"blur(10px)", border:"1px solid rgba(245,239,232,0.15)", padding:"7px 14px", borderRadius:"2px", marginBottom:"20px", fontWeight:600 }}>
+                  Featured Vault
+                </div>
+                <div style={{ fontFamily:"'Fraunces',serif", fontSize:"clamp(32px,4vw,56px)", fontWeight:400, color:"var(--text)", lineHeight:1.0, letterSpacing:"-0.02em", marginBottom:"16px" }}>{featured.name}</div>
+                <div style={{ display:"flex", gap:"24px", fontFamily:"'Inter',sans-serif", fontSize:"12px", color:"var(--text70)", marginBottom:"20px" }}>
+                  <span><strong style={{ color:"var(--text)", marginRight:"5px" }}>{featuredCount}</strong>memories</span>
+                  {featured.start_date && <span><strong style={{ color:"var(--text)", marginRight:"5px" }}>{fmtShort(featured.start_date)}</strong>{featured.end_date ? `— ${fmtShort(featured.end_date)}` : "— Present"}</span>}
+                </div>
+                <div style={{ display:"inline-flex", alignItems:"center", gap:"10px", padding:"12px 24px", background:"var(--text)", color:"var(--bg)", borderRadius:"60px", fontFamily:"'Inter',sans-serif", fontSize:"12px", fontWeight:600, letterSpacing:"0.12em", textTransform:"uppercase" }}>
+                  Open Vault →
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
       {/* Vault grid */}
-      <div className="vault-grid" style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))", gap:"14px" }}>
+      <div className="fu" style={{ animationDelay:"0.08s", marginBottom:"16px", display:"flex", alignItems:"baseline", justifyContent:"space-between" }}>
+        <h2 style={{ fontFamily:"'Fraunces',serif", fontSize:"clamp(28px,3vw,40px)", fontWeight:400, color:"var(--text)", letterSpacing:"-0.02em" }}>
+          Your Chapters <span style={{ fontFamily:"'Fraunces',serif", fontStyle:"italic", fontSize:"0.55em", color:"var(--text40)", fontWeight:300, marginLeft:"8px" }}>— {vaults.length} vault{vaults.length!==1?"s":""}</span>
+        </h2>
+        <button onClick={onSwitchView} style={{ fontFamily:"'Inter',sans-serif", fontSize:"11px", color:"var(--text40)", letterSpacing:"0.18em", textTransform:"uppercase", fontWeight:500, background:"transparent", border:"none", transition:"color 0.2s" }}
+          onMouseEnter={e => e.target.style.color="var(--text)"}
+          onMouseLeave={e => e.target.style.color="var(--text40)"}>
+          Life Thread →
+        </button>
+      </div>
+
+      <div className="vault-grid" style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))", gap:"20px", marginBottom:"64px" }}>
         {vaults.map((v, i) => {
           const vm = memories.filter(m => (m.vault_id||m.vaultId) === v.id);
           return (
-            <div key={v.id} className="fu" style={{ animationDelay:`${0.1+i*0.07}s` }}>
+            <div key={v.id} className="fu" style={{ animationDelay:`${0.1+i*0.06}s` }}>
               <VaultCard vault={v} count={vm.length} onOpen={() => onOpenVault(v)} onImport={() => onImportVault(v)} onDelete={() => onDeleteVault(v.id)} />
             </div>
           );
         })}
-        <div className="fu" style={{ animationDelay:`${0.1+vaults.length*0.07}s`, minHeight:"160px" }}>
-          <button onClick={() => setNewVOpen(true)} style={{ width:"100%", height:"100%", minHeight:"160px", background:"transparent", border:"1px dashed var(--borderS)", borderRadius:"18px", color:"var(--cream40)", fontFamily:"'Raleway',sans-serif", fontSize:"11px", fontWeight:300, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:"10px", textTransform:"uppercase", letterSpacing:"0.12em", transition:"all 0.2s" }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor="var(--sunset3)"; e.currentTarget.style.color="var(--cream70)"; }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor="var(--borderS)"; e.currentTarget.style.color="var(--cream40)"; }}>
-            <span style={{ fontSize:"22px" }}>+</span>New Vault
+        <div className="fu" style={{ animationDelay:`${0.1+vaults.length*0.06}s` }}>
+          <button onClick={() => setNewVOpen(true)}
+            style={{ width:"100%", aspectRatio:"4/3", minHeight:"220px", background:"transparent", border:"1px dashed var(--border)", borderRadius:"4px", color:"var(--text40)", fontFamily:"'Inter',sans-serif", fontSize:"11px", fontWeight:500, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:"12px", textTransform:"uppercase", letterSpacing:"0.18em", transition:"all 0.3s", cursor:"pointer" }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor="var(--sunset)"; e.currentTarget.style.color="var(--text70)"; e.currentTarget.style.background="rgba(232,116,60,0.04)"; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor="var(--border)"; e.currentTarget.style.color="var(--text40)"; e.currentTarget.style.background="transparent"; }}>
+            <span style={{ fontFamily:"'Fraunces',serif", fontSize:"40px", fontWeight:200 }}>+</span>
+            New Chapter
           </button>
         </div>
       </div>
 
-      {/* Revisit demo link — only shown when user has no vaults and is not in demo */}
+      {/* Empty / revisit demo */}
       {!isDemo && vaults.length === 0 && (
-        <div style={{ textAlign:"center", marginTop:"40px" }}>
-          <div style={{ fontFamily:"'Raleway',sans-serif", fontSize:"13px", color:"var(--cream40)", fontWeight:300, marginBottom:"10px" }}>
-            Not sure where to start?
-          </div>
+        <div style={{ textAlign:"center", padding:"80px 20px" }}>
+          <div style={{ fontFamily:"'Fraunces',serif", fontSize:"18px", fontStyle:"italic", color:"var(--text40)", marginBottom:"24px" }}>Your archive is empty.</div>
           <button onClick={onRevisitDemo}
-            style={{ background:"transparent", border:"1px solid var(--borderS)", color:"var(--cream40)", borderRadius:"40px", padding:"10px 24px", fontFamily:"'Raleway',sans-serif", fontSize:"12px", fontWeight:400, letterSpacing:"0.1em", textTransform:"uppercase", transition:"all 0.2s" }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor="var(--sunset3)"; e.currentTarget.style.color="var(--cream70)"; }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor="var(--borderS)"; e.currentTarget.style.color="var(--cream40)"; }}>
-            ✦ Revisit the Demo
+            style={{ background:"transparent", border:"1px solid var(--borderS)", color:"var(--text40)", borderRadius:"60px", padding:"12px 28px", fontFamily:"'Inter',sans-serif", fontSize:"11px", fontWeight:500, letterSpacing:"0.18em", textTransform:"uppercase", transition:"all 0.2s" }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor="var(--sunset)"; e.currentTarget.style.color="var(--text70)"; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor="var(--borderS)"; e.currentTarget.style.color="var(--text40)"; }}>
+            ✦ Explore the Demo
           </button>
         </div>
       )}
+
+      {/* Footer */}
+      <div style={{ borderTop:"1px solid var(--border)", paddingTop:"32px", display:"flex", justifyContent:"space-between", color:"var(--text20)", fontFamily:"'Inter',sans-serif", fontSize:"10px", letterSpacing:"0.18em", textTransform:"uppercase" }}>
+        <div>Vault · A Life In Chapters</div>
+        <div>Vol. I · MMXXVI</div>
+      </div>
 
       {/* New vault modal — multi-step */}
       {newVOpen && (
         <Modal onClose={() => { setNewVOpen(false); setVaultStep(1); }} maxWidth="460px">
           {vaultStep === 1 && (
             <>
-              <div style={{ fontFamily:"'Playfair Display',serif", fontSize:"22px", fontWeight:700, color:"var(--cream)", marginBottom:"6px" }}>What kind of vault?</div>
-              <div style={{ fontFamily:"'Raleway',sans-serif", fontSize:"13px", color:"var(--cream40)", fontWeight:300, marginBottom:"22px" }}>This helps us place it on your Life Thread.</div>
+              <div style={{ fontFamily:"'Fraunces',serif", fontSize:"22px", fontWeight:400, color:"var(--text)", marginBottom:"6px" }}>What kind of chapter?</div>
+              <div style={{ fontFamily:"'Inter',sans-serif", fontSize:"13px", color:"var(--text40)", fontWeight:300, marginBottom:"24px" }}>This helps us place it on your Life Thread.</div>
               <div style={{ display:"flex", flexDirection:"column", gap:"10px" }}>
                 {VAULT_TYPES.map(t => (
                   <button key={t.id} onClick={() => setNf({...nf, vault_type:t.id})}
-                    style={{ background:nf.vault_type===t.id?"rgba(196,92,42,0.15)":"var(--bg1)", border:`1px solid ${nf.vault_type===t.id?"var(--sunset3)":"var(--borderS)"}`, borderRadius:"12px", padding:"14px 16px", display:"flex", alignItems:"center", gap:"14px", textAlign:"left", transition:"all 0.2s", cursor:"pointer" }}>
-                    <span style={{ fontSize:"24px" }}>{t.icon}</span>
+                    style={{ background:nf.vault_type===t.id?"rgba(232,116,60,0.10)":"var(--bg3)", border:`1px solid ${nf.vault_type===t.id?"var(--sunset)":"var(--border)"}`, borderRadius:"6px", padding:"14px 16px", display:"flex", alignItems:"center", gap:"14px", textAlign:"left", transition:"all 0.2s", cursor:"pointer" }}>
+                    <span style={{ fontSize:"22px" }}>{t.icon}</span>
                     <div style={{ flex:1 }}>
-                      <div style={{ fontFamily:"'Playfair Display',serif", fontSize:"15px", fontWeight:700, color:"var(--cream)", marginBottom:"2px" }}>{t.label}</div>
-                      <div style={{ fontFamily:"'Raleway',sans-serif", fontSize:"12px", color:"var(--cream40)", fontWeight:300, lineHeight:1.4 }}>{t.desc}</div>
+                      <div style={{ fontFamily:"'Fraunces',serif", fontSize:"16px", fontWeight:400, color:"var(--text)", marginBottom:"2px" }}>{t.label}</div>
+                      <div style={{ fontFamily:"'Inter',sans-serif", fontSize:"12px", color:"var(--text40)", fontWeight:300, lineHeight:1.4 }}>{t.desc}</div>
                     </div>
                   </button>
                 ))}
               </div>
               <button onClick={() => setVaultStep(2)}
-                style={{ width:"100%", background:"linear-gradient(135deg,var(--sunset1),var(--sunset3))", color:"var(--cream)", border:"none", borderRadius:"10px", padding:"14px", fontFamily:"'Raleway',sans-serif", fontSize:"13px", fontWeight:600, letterSpacing:"0.1em", textTransform:"uppercase", boxShadow:"0 4px 20px rgba(196,92,42,0.4)", marginTop:"20px" }}>
+                style={{ width:"100%", background:"var(--text)", color:"var(--bg)", border:"none", borderRadius:"60px", padding:"14px", fontFamily:"'Inter',sans-serif", fontSize:"12px", fontWeight:600, letterSpacing:"0.14em", textTransform:"uppercase", marginTop:"20px" }}>
                 Next →
               </button>
             </>
@@ -1438,7 +1496,7 @@ function Home({ user, vaults, memories, isDemo, onOpenVault, onImportVault, onNe
 
           {vaultStep === 2 && (
             <>
-              <div style={{ fontFamily:"'Playfair Display',serif", fontSize:"22px", fontWeight:700, color:"var(--cream)", marginBottom:"22px" }}>Vault Details</div>
+              <div style={{ fontFamily:"'Fraunces',serif", fontSize:"22px", fontWeight:400, color:"var(--text)", marginBottom:"22px" }}>Name your vault</div>
               <div style={{ display:"flex", flexDirection:"column", gap:"16px" }}>
                 <div>
                   <Lbl>Name</Lbl>
@@ -1456,27 +1514,27 @@ function Home({ user, vaults, memories, isDemo, onOpenVault, onImportVault, onNe
                       <div><Lbl>Start Date</Lbl><FInput type="date" value={nf.start_date} onChange={v => setNf({...nf,start_date:v})} /></div>
                       <div><Lbl>End Date (optional)</Lbl><FInput type="date" value={nf.end_date} onChange={v => setNf({...nf,end_date:v})} /></div>
                     </div>
-                    <div style={{ fontFamily:"'Raleway',sans-serif", fontSize:"11px", color:"var(--cream40)", fontWeight:300, lineHeight:1.6 }}>Leave end date empty if it's ongoing — like a current relationship or job.</div>
+                    <div style={{ fontFamily:"'Inter',sans-serif", fontSize:"11px", color:"var(--text40)", fontWeight:300, lineHeight:1.6 }}>Leave end date empty if it's ongoing.</div>
                   </>
                 )}
                 <div>
                   <Lbl>Icon</Lbl>
                   <div style={{ display:"flex", gap:"8px", flexWrap:"wrap" }}>
-                    {ICONS.map(ic => <button key={ic} onClick={() => setNf({...nf,icon:ic})} style={{ width:"36px", height:"36px", borderRadius:"8px", background:nf.icon===ic?"var(--bg3)":"var(--bg1)", border:`1px solid ${nf.icon===ic?"var(--sunset3)":"var(--borderS)"}`, color:"var(--cream)", fontSize:"15px", transition:"all 0.15s" }}>{ic}</button>)}
+                    {ICONS.map(ic => <button key={ic} onClick={() => setNf({...nf,icon:ic})} style={{ width:"36px", height:"36px", borderRadius:"6px", background:nf.icon===ic?"var(--bg4)":"var(--bg3)", border:`1px solid ${nf.icon===ic?"var(--sunset)":"var(--border)"}`, color:"var(--text)", fontSize:"15px", transition:"all 0.15s" }}>{ic}</button>)}
                   </div>
                 </div>
                 <div>
                   <Lbl>Color</Lbl>
                   <div style={{ display:"flex", gap:"8px", flexWrap:"wrap" }}>
-                    {COLORS.map(c => <button key={c} onClick={() => setNf({...nf,color:c})} style={{ width:"28px", height:"28px", borderRadius:"50%", background:c, border:`2px solid ${nf.color===c?"var(--cream)":"transparent"}`, transition:"all 0.15s" }} />)}
+                    {COLORS.map(c => <button key={c} onClick={() => setNf({...nf,color:c})} style={{ width:"28px", height:"28px", borderRadius:"50%", background:c, border:`2px solid ${nf.color===c?"var(--text)":"transparent"}`, transition:"all 0.15s" }} />)}
                   </div>
                 </div>
                 <div style={{ display:"flex", gap:"10px", marginTop:"4px" }}>
                   <button onClick={() => setVaultStep(1)}
-                    style={{ background:"transparent", border:"1px solid var(--borderS)", color:"var(--cream40)", borderRadius:"10px", padding:"14px 20px", fontFamily:"'Raleway',sans-serif", fontSize:"12px", letterSpacing:"0.1em", textTransform:"uppercase" }}>← Back</button>
+                    style={{ background:"transparent", border:"1px solid var(--border)", color:"var(--text40)", borderRadius:"60px", padding:"12px 20px", fontFamily:"'Inter',sans-serif", fontSize:"11px", letterSpacing:"0.14em", textTransform:"uppercase", fontWeight:500 }}>← Back</button>
                   <button onClick={createVault} disabled={creating||!nf.name}
-                    style={{ flex:1, background:"linear-gradient(135deg,var(--sunset1),var(--sunset3))", color:"var(--cream)", border:"none", borderRadius:"10px", padding:"14px", fontFamily:"'Raleway',sans-serif", fontSize:"13px", fontWeight:600, letterSpacing:"0.1em", textTransform:"uppercase", boxShadow:"0 4px 20px rgba(196,92,42,0.4)", display:"flex", alignItems:"center", justifyContent:"center", gap:"10px" }}>
-                    {creating ? <><Spinner />Creating...</> : "Create Vault"}
+                    style={{ flex:1, background:"var(--text)", color:"var(--bg)", border:"none", borderRadius:"60px", padding:"12px", fontFamily:"'Inter',sans-serif", fontSize:"12px", fontWeight:600, letterSpacing:"0.14em", textTransform:"uppercase", display:"flex", alignItems:"center", justifyContent:"center", gap:"10px", opacity:creating||!nf.name?0.5:1 }}>
+                    {creating ? <><Spinner color="var(--bg)" />Creating...</> : "Create Vault"}
                   </button>
                 </div>
               </div>
@@ -1615,6 +1673,7 @@ function MainApp({ user }) {
   const [importVault, setImportVault] = useState(null);
   const [loading, setLoading] = useState(!user.isNew);
   const [toast, setToast] = useState(null);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   // Load real data from Supabase for returning users
   useEffect(() => {
@@ -1671,38 +1730,71 @@ function MainApp({ user }) {
   };
 
   if (loading) return (
-    <div style={{ minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", background:"var(--bg1)" }}>
+    <div style={{ minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", background:"var(--bg)" }}>
       <div style={{ textAlign:"center" }}>
-        <div style={{ fontFamily:"'Playfair Display',serif", fontSize:"32px", fontWeight:900, marginBottom:"20px" }}><span className="gold-text">VAULT</span></div>
-        <Spinner size={24} color="var(--sunset3)" />
+        <div style={{ fontFamily:"'Fraunces',serif", fontSize:"22px", fontWeight:300, letterSpacing:"0.35em", marginBottom:"24px" }}><span className="gold-text">VAULT</span></div>
+        <Spinner size={20} color="var(--sunset)" />
       </div>
     </div>
   );
 
   return (
-    <div style={{ minHeight:"100vh", background:"var(--bg1)" }}>
+    <div style={{ minHeight:"100vh", background:"var(--bg)" }}>
       {isDemo && <DemoBanner onExitDemo={() => setShowExitDemo(true)} />}
 
       {/* Nav */}
-      <nav className="nav-pad" style={{ position:"sticky", top:0, zIndex:50, padding:"14px 48px", display:"flex", justifyContent:"space-between", alignItems:"center", background:"rgba(26,15,8,0.95)", backdropFilter:"blur(18px)", borderBottom:"1px solid var(--borderS)" }}>
-        <div onClick={() => setView("home")} style={{ fontFamily:"'Playfair Display',serif", fontSize:"22px", fontWeight:900, cursor:"pointer" }}>
+      <nav className="nav-pad" style={{ position:"sticky", top:0, zIndex:50, padding:"16px 48px", display:"flex", justifyContent:"space-between", alignItems:"center", background:"rgba(14,11,10,0.92)", backdropFilter:"blur(24px)", borderBottom:"1px solid var(--border)" }}>
+        <div onClick={() => setView("home")} style={{ fontFamily:"'Fraunces',serif", fontSize:"20px", fontWeight:900, cursor:"pointer", letterSpacing:"0.18em" }}>
           <span className="gold-text">VAULT</span>
         </div>
-        <div style={{ display:"flex", gap:"6px" }}>
+        <div style={{ display:"flex", gap:"4px" }}>
           {[["home","Archive"],["thread","Life Thread"]].map(([v,l]) => (
-            <button key={v} onClick={() => setView(v)} style={{ background:view===v?"rgba(196,92,42,0.2)":"transparent", border:`1px solid ${view===v?"rgba(196,92,42,0.5)":"transparent"}`, color:view===v?"var(--sunset4)":"var(--cream40)", borderRadius:"8px", padding:"8px 14px", fontFamily:"'Raleway',sans-serif", fontSize:"12px", letterSpacing:"0.1em", textTransform:"uppercase", transition:"all 0.2s" }}>{l}</button>
+            <button key={v} onClick={() => setView(v)} style={{ background:view===v?"rgba(232,116,60,0.12)":"transparent", border:"none", color:view===v?"var(--sunset3)":"var(--text40)", borderRadius:"6px", padding:"8px 16px", fontFamily:"'Inter',sans-serif", fontSize:"11px", letterSpacing:"0.16em", textTransform:"uppercase", fontWeight:view===v?600:400, transition:"all 0.2s" }}>{l}</button>
           ))}
         </div>
-        <div style={{ display:"flex", alignItems:"center", gap:"14px" }}>
+        <div style={{ display:"flex", alignItems:"center", gap:"12px" }}>
           {isDemo && (
             <button onClick={() => setShowExitDemo(true)}
-              style={{ background:"linear-gradient(135deg,var(--sunset1),var(--sunset3))", color:"var(--cream)", border:"none", borderRadius:"8px", padding:"8px 16px", fontFamily:"'Raleway',sans-serif", fontSize:"11px", fontWeight:600, letterSpacing:"0.1em", textTransform:"uppercase", boxShadow:"0 2px 10px rgba(196,92,42,0.4)" }}>
+              style={{ background:"var(--text)", color:"var(--bg)", border:"none", borderRadius:"60px", padding:"8px 20px", fontFamily:"'Inter',sans-serif", fontSize:"11px", fontWeight:600, letterSpacing:"0.12em", textTransform:"uppercase" }}>
               Start My Vault
             </button>
           )}
-          <div style={{ fontFamily:"'Raleway',sans-serif", fontSize:"12px", color:"var(--cream40)", fontWeight:300, cursor:"pointer" }}
-            onClick={signOut} title="Sign out">
-            {user.name} ↗
+          {/* Hamburger menu */}
+          <div style={{ position:"relative" }}>
+            <button onClick={() => setMenuOpen(o => !o)}
+              style={{ width:"38px", height:"38px", borderRadius:"50%", background:"var(--bg3)", border:"1px solid var(--border)", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:"4px", transition:"all 0.2s" }}>
+              <span style={{ width:"14px", height:"1.5px", background:"var(--text70)", display:"block" }}></span>
+              <span style={{ width:"14px", height:"1.5px", background:"var(--text70)", display:"block" }}></span>
+              <span style={{ width:"14px", height:"1.5px", background:"var(--text70)", display:"block" }}></span>
+            </button>
+            {menuOpen && (
+              <div className="si" style={{ position:"absolute", top:"48px", right:0, background:"var(--bg2)", border:"1px solid var(--borderS)", borderRadius:"10px", padding:"8px", minWidth:"180px", zIndex:100, boxShadow:"0 16px 48px rgba(0,0,0,0.5)" }}
+                onMouseLeave={() => setMenuOpen(false)}>
+                <div style={{ padding:"8px 14px 10px", borderBottom:"1px solid var(--border)", marginBottom:"6px" }}>
+                  <div style={{ fontFamily:"'Fraunces',serif", fontSize:"14px", color:"var(--text)", fontWeight:500 }}>{user.name}</div>
+                  <div style={{ fontFamily:"'Inter',sans-serif", fontSize:"11px", color:"var(--text40)", marginTop:"2px" }}>{user.email}</div>
+                </div>
+                {[
+                  { label:"Archive", icon:"◇", action:() => { setView("home"); setMenuOpen(false); } },
+                  { label:"Life Thread", icon:"✦", action:() => { setView("thread"); setMenuOpen(false); } },
+                ].map(item => (
+                  <button key={item.label} onClick={item.action}
+                    style={{ width:"100%", display:"flex", alignItems:"center", gap:"10px", padding:"10px 14px", borderRadius:"6px", background:"transparent", border:"none", color:"var(--text70)", fontFamily:"'Inter',sans-serif", fontSize:"13px", fontWeight:300, textAlign:"left", transition:"background 0.15s", cursor:"pointer" }}
+                    onMouseEnter={e => e.currentTarget.style.background="var(--bg3)"}
+                    onMouseLeave={e => e.currentTarget.style.background="transparent"}>
+                    <span style={{ color:"var(--text40)", fontSize:"11px" }}>{item.icon}</span>{item.label}
+                  </button>
+                ))}
+                <div style={{ borderTop:"1px solid var(--border)", marginTop:"6px", paddingTop:"6px" }}>
+                  <button onClick={signOut}
+                    style={{ width:"100%", display:"flex", alignItems:"center", gap:"10px", padding:"10px 14px", borderRadius:"6px", background:"transparent", border:"none", color:"var(--text40)", fontFamily:"'Inter',sans-serif", fontSize:"13px", fontWeight:300, textAlign:"left", transition:"background 0.15s", cursor:"pointer" }}
+                    onMouseEnter={e => e.currentTarget.style.background="var(--bg3)"}
+                    onMouseLeave={e => e.currentTarget.style.background="transparent"}>
+                    <span style={{ fontSize:"11px" }}>↗</span>Sign Out
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </nav>
@@ -1720,18 +1812,18 @@ function MainApp({ user }) {
       )}
 
       {view === "thread" && (
-        <div style={{ maxWidth:"860px", margin:"0 auto", padding:"40px 24px" }}>
-          <div className="fu" style={{ textAlign:"center", marginBottom:"52px" }}>
-            <div style={{ fontFamily:"'Raleway',sans-serif", fontSize:"10px", letterSpacing:"0.3em", color:"var(--gold)", textTransform:"uppercase", marginBottom:"10px" }}>Golden Thread</div>
-            <h2 style={{ fontFamily:"'Playfair Display',serif", fontSize:"clamp(32px,5vw,54px)", fontWeight:900, color:"var(--cream)", lineHeight:0.95 }}>
-              <span className="gold-text">Your Life Timeline</span>
+        <div style={{ maxWidth:"860px", margin:"0 auto", padding:"52px 48px" }}>
+          <div className="fu" style={{ marginBottom:"52px" }}>
+            <div style={{ fontFamily:"'Inter',sans-serif", fontSize:"10px", letterSpacing:"0.32em", color:"var(--sunset)", textTransform:"uppercase", marginBottom:"16px", fontWeight:600 }}>Life Thread</div>
+            <h2 style={{ fontFamily:"'Fraunces',serif", fontSize:"clamp(36px,5vw,64px)", fontWeight:300, color:"var(--text)", lineHeight:0.95, letterSpacing:"-0.03em" }}>
+              <span className="gold-text">Your Timeline.</span>
             </h2>
-            <p style={{ fontFamily:"'Raleway',sans-serif", fontSize:"13px", color:"var(--cream40)", fontWeight:300, marginTop:"12px", lineHeight:1.75 }}>Every milestone. Every vault. One golden thread.</p>
+            <p style={{ fontFamily:"'Inter',sans-serif", fontSize:"13px", color:"var(--text40)", fontWeight:300, marginTop:"16px", lineHeight:1.75 }}>Every vault and milestone, woven into one thread.</p>
           </div>
           {milestones.length === 0 && vaults.filter(v => v.start_date).length === 0 && memories.length === 0 ? (
-            <div style={{ textAlign:"center", padding:"60px 20px", color:"var(--cream40)", fontFamily:"'Raleway',sans-serif", fontWeight:300 }}>
-              <div style={{ fontSize:"32px", marginBottom:"12px" }}>✦</div>
-              <div>Your life timeline will appear here once you create vaults or add memories.</div>
+            <div style={{ textAlign:"center", padding:"80px 20px", color:"var(--text40)", fontFamily:"'Inter',sans-serif", fontWeight:300 }}>
+              <div style={{ fontFamily:"'Fraunces',serif", fontSize:"18px", fontStyle:"italic", marginBottom:"12px" }}>Your timeline is empty.</div>
+              <div style={{ fontSize:"13px" }}>Create vaults with dates and they'll appear here.</div>
             </div>
           ) : (
             <GoldenThread milestones={milestones} vaults={vaults} memories={memories} onVaultOpen={openVault} />
