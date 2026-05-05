@@ -456,7 +456,7 @@ function Auth({ onAuth }) {
       <div style={{ position:"absolute", bottom:"10%", left:"5%", width:"400px", height:"400px", borderRadius:"50%", background:"radial-gradient(ellipse,rgba(180,60,20,0.12) 0%,transparent 70%)", filter:"blur(60px)", pointerEvents:"none" }} />
       <div className="fu" style={{ textAlign:"center", maxWidth:"560px", position:"relative" }}>
         <div style={{ fontFamily:"'Inter',sans-serif", fontSize:"10px", letterSpacing:"0.38em", color:"var(--sunset)", textTransform:"uppercase", marginBottom:"32px", fontWeight:600 }}>Memory Archive</div>
-        <h1 style={{ fontFamily:"'Fraunces',serif", fontSize:"clamp(80px,14vw,130px)", fontWeight:300, lineHeight:0.88, letterSpacing:"-0.04em", marginBottom:"36px" }}>
+        <h1 style={{ fontFamily:"'Inter',sans-serif", fontSize:"clamp(64px,12vw,110px)", fontWeight:100, lineHeight:1.0, letterSpacing:"0.45em", textTransform:"uppercase", marginBottom:"36px" }}>
           <span className="gold-text">VAULT</span>
         </h1>
         <p style={{ fontFamily:"'Fraunces',serif", fontSize:"22px", fontWeight:300, color:"var(--text70)", lineHeight:1.6, marginBottom:"16px" }}>
@@ -488,7 +488,7 @@ function Auth({ onAuth }) {
       <div style={{ position:"absolute", top:0, left:0, right:0, height:"50%", background:"radial-gradient(ellipse at 50% 0%,rgba(196,92,42,0.2) 0%,transparent 70%)", pointerEvents:"none" }} />
       <div className="si" style={{ width:"100%", maxWidth:"420px", position:"relative" }}>
         <div style={{ textAlign:"center", marginBottom:"36px" }}>
-          <div style={{ fontFamily:"'Playfair Display',serif", fontSize:"42px", fontWeight:900 }}>
+          <div style={{ fontFamily:"'Inter',sans-serif", fontSize:"32px", fontWeight:100, letterSpacing:"0.45em", textTransform:"uppercase" }}>
             <span className="gold-text">VAULT</span>
           </div>
           <div style={{ fontFamily:"'Raleway',sans-serif", fontSize:"13px", color:"var(--cream40)", marginTop:"6px", fontWeight:300 }}>
@@ -696,30 +696,33 @@ function ThreadCard({ ev, date, vault, dir, onVaultOpen }) {
   const [h, setH] = useState(false);
   const c = vault ? vault.color : "var(--gold)";
   const isVaultBand = ev.type === "vault";
+  const photo = ev.memory?.photo_url || ev.memory?.src;
   return (
     <div onMouseEnter={() => setH(true)} onMouseLeave={() => setH(false)}
       onClick={() => vault && onVaultOpen(vault)}
       className="thread-card"
-      style={{ display:"inline-block", maxWidth:"320px", textAlign:dir, background:h?`${c}1A`:isVaultBand?`${c}10`:"rgba(245,237,224,0.03)", border:`1px solid ${h?c+"66":isVaultBand?c+"40":"var(--borderS)"}`, borderRadius:"14px", padding:"18px 22px", cursor:vault?"pointer":"default", transition:"all 0.3s", transform:h?`translateX(${dir==="right"?"-":""}5px)`:"none" }}>
-      <div style={{ fontFamily:"'Raleway',sans-serif", fontSize:"10px", letterSpacing:"0.18em", color:"var(--cream40)", textTransform:"uppercase", marginBottom:"5px" }}>
-        {fmtShort(date)}{ev.endDate ? ` — ${fmtShort(ev.endDate)}` : ev.type === "vault" && !ev.endDate ? " — Present" : ""}
-      </div>
-      <div style={{ display:"flex", alignItems:"center", gap:"8px", justifyContent:dir==="right"?"flex-end":"flex-start", marginBottom:"4px" }}>
-        {dir === "left" && <span style={{ fontSize:"18px" }}>{ev.emoji}</span>}
-        <div className="thread-card-title" style={{ fontFamily:"'Playfair Display',serif", fontSize:isVaultBand?"19px":"17px", fontWeight:700, color:"var(--cream)" }}>{ev.title}</div>
-        {dir === "right" && <span style={{ fontSize:"18px" }}>{ev.emoji}</span>}
-      </div>
-      <div style={{ fontFamily:"'Raleway',sans-serif", fontSize:"10px", letterSpacing:"0.14em", color:c, textTransform:"uppercase", fontWeight:500 }}>{ev.label}</div>
-      {vault && ev.type !== "vault" && (
-        <div style={{ marginTop:"10px", display:"inline-flex", alignItems:"center", gap:"6px", background:`${vault.color}25`, border:`1px solid ${vault.color}55`, borderRadius:"20px", padding:"5px 12px", fontSize:"11px", color:"var(--cream70)", fontFamily:"'Raleway',sans-serif" }}>
-          <span style={{ color:vault.color }}>{vault.icon}</span>{vault.name} →
+      style={{ display:"inline-block", maxWidth:"340px", textAlign:"left", background:h?`${c}14`:isVaultBand?`${c}0A`:"var(--bg2)", border:`1px solid ${h?c+"55":isVaultBand?c+"30":"var(--border)"}`, borderRadius:"4px", cursor:vault?"pointer":"default", transition:"all 0.3s", transform:h?`translateX(${dir==="right"?"-":""}5px)`:"none", overflow:"hidden" }}>
+      {/* Photo — full width if present */}
+      {photo && (
+        <div style={{ width:"100%", aspectRatio:"16/9", overflow:"hidden", position:"relative" }}>
+          <img src={photo} alt={ev.title} style={{ width:"100%", height:"100%", objectFit:"cover", filter:"saturate(0.88)", transition:"transform 6s ease", transform:h?"scale(1.04)":"scale(1)" }} />
+          <div style={{ position:"absolute", inset:0, background:"linear-gradient(to top, rgba(14,11,10,0.5), transparent 60%)" }} />
         </div>
       )}
-      {isVaultBand && (
-        <div style={{ marginTop:"8px", fontFamily:"'Raleway',sans-serif", fontSize:"11px", color:"var(--cream70)", fontWeight:400 }}>
-          Open vault →
+      {/* Content */}
+      <div style={{ padding:"18px 20px" }}>
+        <div style={{ fontFamily:"'Inter',sans-serif", fontSize:"9px", letterSpacing:"0.22em", color:"var(--text40)", textTransform:"uppercase", marginBottom:"8px", fontWeight:600 }}>
+          {fmtShort(date)}{ev.endDate ? ` — ${fmtShort(ev.endDate)}` : ev.type === "vault" && !ev.endDate ? " — Present" : ""}
         </div>
-      )}
+        <div className="thread-card-title" style={{ fontFamily:"'Fraunces',serif", fontSize:isVaultBand?"18px":"16px", fontWeight:400, color:"var(--text)", lineHeight:1.1, marginBottom:"6px", letterSpacing:"-0.01em" }}>{ev.title}</div>
+        {ev.memory?.description && (
+          <div style={{ fontFamily:"'Inter',sans-serif", fontSize:"12px", color:"var(--text40)", fontWeight:300, lineHeight:1.6, marginBottom:"8px" }}>{ev.memory.description}</div>
+        )}
+        <div style={{ fontFamily:"'Inter',sans-serif", fontSize:"9px", letterSpacing:"0.18em", color:c, textTransform:"uppercase", fontWeight:600 }}>{ev.label}</div>
+        {vault && isVaultBand && (
+          <div style={{ marginTop:"10px", fontFamily:"'Inter',sans-serif", fontSize:"10px", color:"var(--text40)", letterSpacing:"0.14em", textTransform:"uppercase" }}>Open vault →</div>
+        )}
+      </div>
     </div>
   );
 }
@@ -1067,36 +1070,49 @@ function Collage({ mems, vault, onClose }) {
 }
 
 // ══════════════════════════════════════════════════════════════
-//  MEMORY ROW
+//  MEMORY CARD — Photo-first editorial layout
 // ══════════════════════════════════════════════════════════════
-function MemRow({ m, last, vc, onDelete }) {
+function MemRow({ m, last, vc, onDelete, reverse }) {
   const [h, setH] = useState(false);
   const [confirmDel, setConfirmDel] = useState(false);
   const src = m.photo_url || m.src;
   const date = m.memory_date || m.date;
   return (
     <>
-      <div style={{ display:"flex", alignItems:"stretch" }} onMouseEnter={() => setH(true)} onMouseLeave={() => setH(false)}>
-        <div style={{ width:"100px", flexShrink:0, paddingTop:"20px", paddingRight:"16px", textAlign:"right" }}>
-          <div style={{ fontFamily:"'Raleway',sans-serif", fontSize:"11px", color:"var(--cream40)", fontWeight:300, lineHeight:1.5 }}>
-            {fmtMed(date)}<br/><span style={{ fontSize:"10px", opacity:0.6 }}>{getYr(date)}</span>
+      <div onMouseEnter={() => setH(true)} onMouseLeave={() => setH(false)}
+        style={{ display:"grid", gridTemplateColumns: src ? "1fr 1fr" : "1fr", marginBottom:"2px", transition:"transform 0.4s", transform:h?"translateY(-3px)":"none", direction: reverse ? "rtl" : "ltr" }}>
+        {/* Photo side */}
+        {src && (
+          <div style={{ position:"relative", aspectRatio:"4/3", overflow:"hidden", background:"var(--bg3)", direction:"ltr" }}>
+            <img src={src} alt={m.title} style={{ width:"100%", height:"100%", objectFit:"cover", filter:"saturate(0.92)", transition:"transform 6s ease", transform:h?"scale(1.04)":"scale(1)" }} />
+            {m.mood && m.mood !== "unknown" && (
+              <div style={{ position:"absolute", top:"14px", left:"14px", fontFamily:"'Inter',sans-serif", fontSize:"9px", letterSpacing:"0.22em", textTransform:"uppercase", background:"rgba(14,11,10,0.65)", backdropFilter:"blur(8px)", color:"rgba(245,239,232,0.85)", padding:"6px 12px", fontWeight:600 }}>
+                {m.mood}
+              </div>
+            )}
           </div>
-        </div>
-        <div style={{ display:"flex", flexDirection:"column", alignItems:"center", width:"18px", flexShrink:0 }}>
-          <div style={{ width:"8px", height:"8px", borderRadius:"50%", background:src?vc:"transparent", border:`1.5px solid ${vc}`, marginTop:"24px", flexShrink:0, boxShadow:`0 0 0 3px var(--bg1)`, zIndex:1 }} />
-          {!last && <div style={{ flex:1, width:"1px", background:"var(--borderS)", marginTop:"4px" }} />}
-        </div>
-        <div style={{ flex:1, marginLeft:"14px", marginBottom:"10px", marginTop:"10px", background:h?"rgba(196,92,42,0.08)":"rgba(245,237,224,0.02)", border:`1px solid ${h?"rgba(196,92,42,0.25)":"var(--borderS)"}`, borderRadius:"12px", padding:"14px 16px", transition:"all 0.25s", transform:h?"translateX(4px)":"none", display:"flex", gap:"12px", alignItems:"flex-start", position:"relative" }}>
-          {src && <img src={src} alt="" style={{ width:"52px", height:"52px", borderRadius:"8px", objectFit:"cover", flexShrink:0 }} />}
-          <div style={{ flex:1 }}>
-            <div style={{ fontFamily:"'Playfair Display',serif", fontSize:"16px", fontWeight:700, color:"var(--cream)", marginBottom:"3px" }}>{m.title}</div>
-            <div style={{ fontFamily:"'Raleway',sans-serif", fontSize:"13px", color:"var(--cream40)", fontWeight:300, lineHeight:1.6 }}>{m.description||m.desc}</div>
+        )}
+        {/* Content side */}
+        <div style={{ background:h?"#1E1814":"#181410", border:"1px solid rgba(245,239,232,0.06)", padding:"40px 44px", display:"flex", flexDirection:"column", justifyContent:"center", direction:"ltr", position:"relative", transition:"background 0.3s" }}>
+          <div style={{ fontFamily:"'Inter',sans-serif", fontSize:"10px", letterSpacing:"0.28em", textTransform:"uppercase", color:"rgba(245,239,232,0.35)", marginBottom:"16px", fontWeight:600 }}>
+            {date ? new Date(date).toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"}) : ""}
           </div>
-          {!src && <div style={{ fontSize:"18px", opacity:0.5 }}>{m.emoji}</div>}
+          <div style={{ fontFamily:"'Fraunces',serif", fontSize:"clamp(22px,2.5vw,34px)", fontWeight:400, color:"#F5EFE8", lineHeight:1.05, letterSpacing:"-0.02em", marginBottom:"16px" }}>{m.title}</div>
+          {(m.description||m.desc) && (
+            <div style={{ fontFamily:"'Inter',sans-serif", fontSize:"14px", color:"rgba(245,239,232,0.58)", lineHeight:1.8, fontWeight:300, marginBottom:"20px" }}>{m.description||m.desc}</div>
+          )}
+          {m.detectedLocation && (
+            <div style={{ display:"flex", alignItems:"center", gap:"6px", fontFamily:"'Inter',sans-serif", fontSize:"10px", color:vc, letterSpacing:"0.18em", textTransform:"uppercase", fontWeight:600 }}>
+              <span style={{ width:"4px", height:"4px", borderRadius:"50%", background:vc, display:"inline-block" }}></span>
+              {m.detectedLocation}
+            </div>
+          )}
+          {/* Delete button */}
           {h && (
-            <button onClick={() => setConfirmDel(true)} style={{ position:"absolute", top:"8px", right:"10px", color:"rgba(200,60,60,0.5)", fontSize:"13px", padding:"2px 6px", borderRadius:"4px", transition:"color 0.15s" }}
-              onMouseEnter={e => e.target.style.color="#F08080"}
-              onMouseLeave={e => e.target.style.color="rgba(200,60,60,0.5)"}>✕</button>
+            <button onClick={() => setConfirmDel(true)}
+              style={{ position:"absolute", top:"14px", right:"14px", width:"24px", height:"24px", borderRadius:"50%", background:"rgba(180,50,50,0.10)", border:"1px solid rgba(180,50,50,0.25)", color:"rgba(240,128,128,0.6)", fontSize:"11px", display:"flex", alignItems:"center", justifyContent:"center", transition:"all 0.2s" }}
+              onMouseEnter={e => { e.currentTarget.style.background="rgba(180,50,50,0.2)"; e.currentTarget.style.color="#F08080"; }}
+              onMouseLeave={e => { e.currentTarget.style.background="rgba(180,50,50,0.10)"; e.currentTarget.style.color="rgba(240,128,128,0.6)"; }}>✕</button>
           )}
         </div>
       </div>
@@ -1174,37 +1190,38 @@ function VaultView({ vault, mems, userId, onBack, onMemAdded, onMemDeleted, onIm
 
   return (
     <div className="fi" style={{ minHeight:"100vh" }}>
-      {/* Sticky header */}
-      <div className="vault-header" style={{ padding:"36px 48px 28px", borderBottom:"1px solid var(--borderS)", position:"sticky", top:0, zIndex:10, backdropFilter:"blur(20px)", background:`radial-gradient(ellipse at 30% 50%,${vault.color}20 0%,transparent 60%),rgba(26,15,8,0.95)` }}>
-        <button onClick={onBack} style={{ color:"var(--cream40)", fontFamily:"'Raleway',sans-serif", fontSize:"11px", letterSpacing:"0.18em", textTransform:"uppercase", marginBottom:"18px", display:"flex", alignItems:"center", gap:"8px", transition:"color 0.2s" }}
-          onMouseEnter={e => e.target.style.color="var(--cream70)"}
-          onMouseLeave={e => e.target.style.color="var(--cream40)"}>
+      {/* Vault header */}
+      <div className="vault-header" style={{ padding:"32px 48px 24px", borderBottom:"1px solid var(--border)", position:"sticky", top:0, zIndex:10, backdropFilter:"blur(24px)", background:"rgba(14,11,10,0.94)" }}>
+        <button onClick={onBack}
+          style={{ color:"var(--text40)", fontFamily:"'Inter',sans-serif", fontSize:"11px", letterSpacing:"0.2em", textTransform:"uppercase", marginBottom:"16px", display:"flex", alignItems:"center", gap:"8px", transition:"color 0.2s", background:"none", border:"none" }}
+          onMouseEnter={e => e.currentTarget.style.color="var(--text70)"}
+          onMouseLeave={e => e.currentTarget.style.color="var(--text40)"}>
           ← My Vaults
         </button>
         <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-end", flexWrap:"wrap", gap:"14px" }}>
           <div>
-            <div style={{ display:"flex", alignItems:"center", gap:"10px", marginBottom:"6px" }}>
-              <div style={{ fontFamily:"'Raleway',sans-serif", fontSize:"10px", letterSpacing:"0.24em", color:vault.color, textTransform:"uppercase" }}>{vault.icon} Vault</div>
-              {isDemo && <span className="demo-badge">Demo</span>}
+            <div style={{ fontFamily:"'Inter',sans-serif", fontSize:"9px", letterSpacing:"0.28em", color:vault.color, textTransform:"uppercase", marginBottom:"10px", fontWeight:600, display:"flex", alignItems:"center", gap:"8px" }}>
+              <span>{vault.icon}</span>{vault.vault_type || "vault"}{isDemo && <span className="demo-badge" style={{ marginLeft:"4px" }}>Demo</span>}
             </div>
-            <div style={{ fontFamily:"'Playfair Display',serif", fontSize:"clamp(32px,5vw,50px)", fontWeight:900, color:"var(--cream)", lineHeight:1, letterSpacing:"-0.02em" }}>{vault.name}</div>
-            <div style={{ fontFamily:"'Raleway',sans-serif", fontSize:"13px", color:"var(--cream40)", fontWeight:300, marginTop:"5px" }}>{mems.length} memor{mems.length===1?"y":"ies"}</div>
+            <div style={{ fontFamily:"'Fraunces',serif", fontSize:"clamp(28px,4vw,48px)", fontWeight:300, color:"var(--text)", lineHeight:0.95, letterSpacing:"-0.03em" }}>{vault.name}</div>
+            <div style={{ fontFamily:"'Inter',sans-serif", fontSize:"12px", color:"var(--text40)", fontWeight:300, marginTop:"8px" }}>
+              {mems.length} {mems.length===1?"memory":"memories"}
+              {vault.start_date && <span style={{ marginLeft:"14px", color:vault.color+"99" }}>{fmtShort(vault.start_date)}{vault.end_date ? ` — ${fmtShort(vault.end_date)}` : " — Present"}</span>}
+            </div>
           </div>
-          <div className="vault-actions" style={{ display:"flex", gap:"10px", flexWrap:"wrap" }}>
-            {[["🖼", "Collage", () => setShowColl(true)], ["▶", "Slideshow", () => setShowSS(true)], ["✦ AI Import", null, onImportAI, true], ["+ Add", null, () => setAddOpen(true)]].map(([icon, label, fn, gold]) => (
-              <button key={icon+label} onClick={fn}
-                style={{ background:gold?"linear-gradient(135deg,var(--sunset1),var(--sunset3))":"var(--cream10)", color:gold?"var(--cream)":"var(--cream70)", border:gold?"none":"1px solid var(--borderS)", borderRadius:"8px", padding:"10px 16px", fontFamily:"'Raleway',sans-serif", fontSize:"12px", fontWeight:gold?600:400, letterSpacing:"0.1em", textTransform:"uppercase", transition:"all 0.2s", boxShadow:gold?"0 2px 14px rgba(196,92,42,0.4)":"none", whiteSpace:"nowrap" }}>
-                {icon}{label ? ` ${label}` : ""}
-              </button>
-            ))}
+          <div className="vault-actions" style={{ display:"flex", gap:"8px", flexWrap:"wrap" }}>
+            <button onClick={() => setShowColl(true)} style={{ background:"var(--bg3)", border:"1px solid var(--border)", color:"var(--text70)", borderRadius:"60px", padding:"9px 18px", fontFamily:"'Inter',sans-serif", fontSize:"10px", fontWeight:600, letterSpacing:"0.14em", textTransform:"uppercase", transition:"all 0.2s" }}>Collage</button>
+            <button onClick={() => setShowSS(true)} style={{ background:"var(--bg3)", border:"1px solid var(--border)", color:"var(--text70)", borderRadius:"60px", padding:"9px 18px", fontFamily:"'Inter',sans-serif", fontSize:"10px", fontWeight:600, letterSpacing:"0.14em", textTransform:"uppercase", transition:"all 0.2s" }}>Slideshow</button>
+            <button onClick={onImportAI} style={{ background:`${vault.color}18`, border:`1px solid ${vault.color}44`, color:vault.color, borderRadius:"60px", padding:"9px 18px", fontFamily:"'Inter',sans-serif", fontSize:"10px", fontWeight:600, letterSpacing:"0.14em", textTransform:"uppercase", transition:"all 0.2s" }}>✦ AI Import</button>
+            <button onClick={() => setAddOpen(true)} style={{ background:"var(--text)", color:"var(--bg)", border:"none", borderRadius:"60px", padding:"9px 18px", fontFamily:"'Inter',sans-serif", fontSize:"10px", fontWeight:600, letterSpacing:"0.14em", textTransform:"uppercase" }}>+ Add</button>
           </div>
         </div>
       </div>
 
       {/* Add form */}
       {addOpen && (
-        <div className="add-form" style={{ margin:"20px 48px", background:"var(--bg2)", border:"1px solid var(--border)", borderRadius:"16px", padding:"22px" }}>
-          <div style={{ fontFamily:"'Playfair Display',serif", fontSize:"18px", fontWeight:700, color:"var(--cream)", marginBottom:"16px" }}>Add a Memory</div>
+        <div className="add-form" style={{ margin:"24px 48px", background:"var(--bg2)", border:"1px solid var(--borderS)", borderRadius:"8px", padding:"24px" }}>
+          <div style={{ fontFamily:"'Fraunces',serif", fontSize:"20px", fontWeight:400, color:"var(--text)", marginBottom:"20px" }}>Add a Memory</div>
           <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"12px", marginBottom:"12px" }}>
             <div><Lbl>Title</Lbl><FInput value={nm.title} onChange={v => setNm({...nm,title:v})} placeholder="Memory title" /></div>
             <div><Lbl>Date</Lbl><FInput type="date" value={nm.date} onChange={v => setNm({...nm,date:v})} /></div>
@@ -1212,50 +1229,50 @@ function VaultView({ vault, mems, userId, onBack, onMemAdded, onMemDeleted, onIm
           <div style={{ marginBottom:"12px" }}>
             <Lbl>Description</Lbl>
             <textarea value={nm.desc} onChange={e => setNm({...nm,desc:e.target.value})} placeholder="Describe this memory..."
-              style={{ width:"100%", background:"var(--bg1)", border:"1px solid var(--borderS)", borderRadius:"10px", padding:"12px 14px", color:"var(--cream)", fontSize:"13px", fontFamily:"'Raleway',sans-serif", fontWeight:300, resize:"vertical", minHeight:"70px" }} />
+              style={{ width:"100%", background:"var(--bg3)", border:"1px solid var(--border)", borderRadius:"6px", padding:"12px 14px", color:"var(--text)", fontSize:"13px", fontFamily:"'Inter',sans-serif", fontWeight:300, resize:"vertical", minHeight:"80px" }} />
           </div>
           <div style={{ marginBottom:"16px" }}>
             <Lbl>Photo (optional)</Lbl>
-            <div onClick={() => fileRef.current.click()} style={{ border:"1px dashed var(--borderS)", borderRadius:"10px", padding:"14px", textAlign:"center", cursor:"pointer", transition:"border-color 0.2s" }}
-              onMouseEnter={e => e.currentTarget.style.borderColor="var(--sunset3)"}
-              onMouseLeave={e => e.currentTarget.style.borderColor="var(--borderS)"}>
+            <div onClick={() => fileRef.current.click()} style={{ border:"1px dashed var(--border)", borderRadius:"6px", padding:"16px", textAlign:"center", cursor:"pointer", transition:"border-color 0.2s" }}
+              onMouseEnter={e => e.currentTarget.style.borderColor="var(--sunset)"}
+              onMouseLeave={e => e.currentTarget.style.borderColor="var(--border)"}>
               <input ref={fileRef} type="file" accept="image/*" style={{ display:"none" }} onChange={e => {
                 const f = e.target.files[0]; if (!f) return;
                 setImgFile(f);
                 const r = new FileReader(); r.onload = ev => setImgPrev(ev.target.result); r.readAsDataURL(f);
               }} />
-              {imgPrev ? <img src={imgPrev} alt="" style={{ maxHeight:"100px", borderRadius:"8px", objectFit:"cover" }} />
-                : <div style={{ fontFamily:"'Raleway',sans-serif", fontSize:"13px", color:"var(--cream40)", fontWeight:300 }}>Click to add a photo</div>}
+              {imgPrev ? <img src={imgPrev} alt="" style={{ maxHeight:"120px", borderRadius:"4px", objectFit:"cover" }} />
+                : <div style={{ fontFamily:"'Inter',sans-serif", fontSize:"13px", color:"var(--text40)", fontWeight:300 }}>Click to add a photo</div>}
             </div>
           </div>
           <div style={{ display:"flex", gap:"10px" }}>
             <button onClick={saveAdd} disabled={saving}
-              style={{ background:"linear-gradient(135deg,var(--sunset1),var(--sunset3))", color:"var(--cream)", border:"none", borderRadius:"8px", padding:"12px 22px", fontFamily:"'Raleway',sans-serif", fontSize:"12px", fontWeight:600, letterSpacing:"0.1em", textTransform:"uppercase", display:"flex", alignItems:"center", gap:"8px" }}>
-              {saving ? <><Spinner />Saving...</> : "Save Memory"}
+              style={{ background:"var(--text)", color:"var(--bg)", border:"none", borderRadius:"60px", padding:"12px 28px", fontFamily:"'Inter',sans-serif", fontSize:"11px", fontWeight:600, letterSpacing:"0.14em", textTransform:"uppercase", display:"flex", alignItems:"center", gap:"8px" }}>
+              {saving ? <><Spinner color="var(--bg)" />Saving...</> : "Save Memory"}
             </button>
             <button onClick={() => { setAddOpen(false); setImgFile(null); setImgPrev(null); setNm({title:"",date:"",desc:""}); }}
-              style={{ background:"transparent", border:"1px solid var(--borderS)", color:"var(--cream40)", borderRadius:"8px", padding:"12px 22px", fontFamily:"'Raleway',sans-serif", fontSize:"12px", letterSpacing:"0.1em", textTransform:"uppercase" }}>Cancel</button>
+              style={{ background:"transparent", border:"1px solid var(--border)", color:"var(--text40)", borderRadius:"60px", padding:"12px 24px", fontFamily:"'Inter',sans-serif", fontSize:"11px", letterSpacing:"0.14em", textTransform:"uppercase" }}>Cancel</button>
           </div>
         </div>
       )}
 
-      {/* Timeline */}
-      <div className="mem-timeline" style={{ padding:"32px 48px 80px", maxWidth:"800px" }}>
+      {/* Memory grid — photo-first editorial */}
+      <div style={{ maxWidth:"1200px", margin:"0 auto", padding:"0 0 80px" }}>
         {mems.length === 0 && (
-          <div style={{ textAlign:"center", padding:"70px 20px", color:"var(--cream40)", fontFamily:"'Raleway',sans-serif", fontWeight:300 }}>
-            <div style={{ fontSize:"32px", marginBottom:"12px" }}>✦</div>
-            <div>This vault is empty.</div>
-            <div style={{ marginTop:"8px", fontSize:"13px" }}>Add memories manually or use <span style={{ color:"var(--sunset3)" }}>AI Import</span>.</div>
+          <div style={{ textAlign:"center", padding:"100px 48px", color:"var(--text40)" }}>
+            <div style={{ fontFamily:"'Fraunces',serif", fontSize:"18px", fontStyle:"italic", marginBottom:"12px" }}>This vault is empty.</div>
+            <div style={{ fontFamily:"'Inter',sans-serif", fontSize:"13px", fontWeight:300 }}>Add memories manually or use <span style={{ color:"var(--sunset)" }}>AI Import</span>.</div>
           </div>
         )}
         {years.map(year => (
-          <div key={year} style={{ marginBottom:"40px" }}>
-            <div style={{ display:"flex", alignItems:"center", gap:"14px", marginBottom:"4px", paddingLeft:"112px" }}>
-              <div style={{ fontFamily:"'Raleway',sans-serif", fontSize:"10px", letterSpacing:"0.22em", color:vault.color, textTransform:"uppercase" }}>{year}</div>
-              <div style={{ flex:1, height:"1px", background:`linear-gradient(90deg,${vault.color}88,transparent)` }} />
+          <div key={year}>
+            {/* Year divider */}
+            <div style={{ display:"flex", alignItems:"center", gap:"20px", padding:"40px 48px 20px" }}>
+              <div style={{ fontFamily:"'Fraunces',serif", fontSize:"13px", color:vault.color, fontStyle:"italic" }}>{year}</div>
+              <div style={{ flex:1, height:"1px", background:`linear-gradient(90deg,${vault.color}44,transparent)` }} />
             </div>
             {byYear[year].map((m, idx) => (
-              <MemRow key={m.id} m={m} last={idx===byYear[year].length-1} vc={vault.color} onDelete={deleteMem} />
+              <MemRow key={m.id} m={m} last={idx===byYear[year].length-1} vc={vault.color} onDelete={deleteMem} reverse={idx%2!==0} />
             ))}
           </div>
         ))}
@@ -1547,112 +1564,212 @@ function Home({ user, vaults, memories, isDemo, onOpenVault, onImportVault, onNe
 }
 
 // ══════════════════════════════════════════════════════════════
-//  ONBOARDING WALKTHROUGH
+//  ONBOARDING WALKTHROUGH — Narrative fullscreen
 // ══════════════════════════════════════════════════════════════
-const ONBOARDING_STEPS = [
-  {
-    id: "welcome",
-    emoji: "✦",
-    title: "Welcome to Vault",
-    body: "Vault turns your camera roll into a curated timeline of your life — organized by the people and moments that matter most.",
-    cta: "Show Me How →",
-  },
-  {
-    id: "vaults",
-    emoji: "⌂",
-    title: "These are your Vaults",
-    body: "Each vault is a chapter — dedicated to a person or group in your life. Family, your partner, friends, or just yourself. Tap any vault to open it.",
-    cta: "Next →",
-  },
-  {
-    id: "memories",
-    emoji: "📸",
-    title: "Memories live inside Vaults",
-    body: "Inside each vault is a timeline of memories — photos, moments, milestones — organized by date so your story unfolds naturally.",
-    cta: "Next →",
-  },
-  {
-    id: "ai",
-    emoji: "🤖",
-    title: "AI does 95% of the work",
-    body: "Tap 'AI Import' inside any vault. Describe what you're looking for — 'Summer 2022' or 'group photos with friends' — and Claude Vision will scan your photos and pre-select the best matches. You just approve.",
-    cta: "Next →",
-  },
-  {
-    id: "thread",
-    emoji: "🧵",
-    title: "The Golden Thread",
-    body: "Tap 'Life Thread' in the nav bar. It weaves every vault into one scrollable timeline — your entire life story in chronological order.",
-    cta: "Next →",
-  },
-  {
-    id: "collage",
-    emoji: "🖼",
-    title: "Collages & Slideshows",
-    body: "Inside any vault, tap 'Collage' or 'Slideshow' to turn your memories into something beautiful — not just a folder of photos.",
-    cta: "Next →",
-  },
-  {
-    id: "sandbox",
-    emoji: "🎮",
-    title: "Now explore — this is your sandbox",
-    body: "Everything you see is a demo filled with sample memories. Play with it freely — open vaults, add memories, try AI Import, watch a slideshow. Nothing here is real data. When you're ready to start your own story, tap 'Start My Vault' in the top bar.",
-    cta: "Explore the Demo →",
-    isFinal: true,
-  },
-];
-
 function OnboardingOverlay({ onDismiss }) {
   const [step, setStep] = useState(0);
-  const current = ONBOARDING_STEPS[step];
-  const isLast = step === ONBOARDING_STEPS.length - 1;
+  const total = 6;
 
-  const next = () => {
-    if (isLast) { onDismiss(); return; }
-    setStep(s => s + 1);
-  };
-
+  const next = () => { if (step < total - 1) setStep(s => s + 1); else onDismiss(); };
   const prev = () => { if (step > 0) setStep(s => s - 1); };
 
-  return (
-    <div className="fi" style={{ position:"fixed", inset:0, zIndex:500, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"flex-end", padding:"0 0 40px 0", background:"rgba(10,5,2,0.82)", backdropFilter:"blur(6px)" }}>
+  const slides = [
+    // Slide 1 — Welcome
+    () => (
+      <div style={{ textAlign:"center", maxWidth:"680px", margin:"0 auto" }}>
+        <div style={{ fontFamily:"'Inter',sans-serif", fontSize:"10px", letterSpacing:"0.35em", textTransform:"uppercase", color:"var(--sunset)", fontWeight:600, marginBottom:"28px", display:"flex", alignItems:"center", justifyContent:"center", gap:"10px" }}>
+          <span style={{ width:"5px", height:"5px", borderRadius:"50%", background:"var(--sunset)", boxShadow:"0 0 10px var(--sunset)", display:"inline-block" }} />
+          Welcome to Vault
+        </div>
+        <h1 style={{ fontFamily:"'Inter',sans-serif", fontWeight:100, fontSize:"clamp(52px,9vw,110px)", letterSpacing:"0.18em", textTransform:"uppercase", lineHeight:1.0, marginBottom:"32px" }}>
+          <span style={{ background:"linear-gradient(135deg,#FFB47A,#E8743C,#C04820)", WebkitBackgroundClip:"text", backgroundClip:"text", WebkitTextFillColor:"transparent" }}>
+            Your life<br/>deserves<br/>better.
+          </span>
+        </h1>
+        <p style={{ fontFamily:"'Inter',sans-serif", fontWeight:300, fontSize:"17px", color:"rgba(245,239,232,0.6)", lineHeight:1.8, maxWidth:"460px", margin:"0 auto 36px" }}>
+          You've lived thousands of moments worth remembering. Most of them are sitting in a camera roll, unsorted and forgotten.
+        </p>
+        <div style={{ display:"inline-flex", alignItems:"center", gap:"24px", padding:"16px 32px", border:"1px solid rgba(245,239,232,0.1)", borderRadius:"60px" }}>
+          <div style={{ fontFamily:"'Inter',sans-serif", fontWeight:100, fontSize:"36px", letterSpacing:"0.1em", color:"var(--sunset)" }}>93%</div>
+          <div style={{ fontFamily:"'Inter',sans-serif", fontSize:"11px", color:"rgba(245,239,232,0.4)", letterSpacing:"0.08em", textAlign:"left", lineHeight:1.5, fontWeight:300 }}>of people struggle to find<br/>meaningful photos when<br/>they actually need them.</div>
+        </div>
+      </div>
+    ),
+    // Slide 2 — The Problem
+    () => (
+      <div style={{ maxWidth:"780px", margin:"0 auto" }}>
+        <div style={{ fontFamily:"'Inter',sans-serif", fontSize:"10px", letterSpacing:"0.35em", textTransform:"uppercase", color:"var(--sunset)", fontWeight:600, marginBottom:"28px", display:"flex", alignItems:"center", gap:"10px" }}>
+          <span style={{ width:"5px", height:"5px", borderRadius:"50%", background:"var(--sunset)", boxShadow:"0 0 10px var(--sunset)", display:"inline-block" }} />
+          The Problem
+        </div>
+        <h1 style={{ fontFamily:"'Inter',sans-serif", fontWeight:100, fontSize:"clamp(36px,5.5vw,72px)", letterSpacing:"0.18em", textTransform:"uppercase", lineHeight:1.0, marginBottom:"28px" }}>
+          You have thousands of{" "}
+          <span style={{ background:"linear-gradient(135deg,#FFB47A,#E8743C)", WebkitBackgroundClip:"text", backgroundClip:"text", WebkitTextFillColor:"transparent" }}>memories.</span>
+          <br/>None of them have a home.
+        </h1>
+        <p style={{ fontFamily:"'Inter',sans-serif", fontWeight:300, fontSize:"16px", color:"rgba(245,239,232,0.6)", lineHeight:1.8, maxWidth:"520px", marginBottom:"40px" }}>
+          Your camera roll has thousands of photos. Your college years. Your travels. The last holiday with your grandparents. All buried under screenshots and blurry food photos.
+        </p>
+        <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:"8px", opacity:0.4, filter:"saturate(0.3)" }}>
+          {["photo-1488085061387-422e29b40080","photo-1522621157681-54c8c53b6a5d","photo-1469854523086-cc02fe5d8800","photo-1452573992436-6d508f200b30"].map(id => (
+            <div key={id} style={{ aspectRatio:"1", backgroundImage:`url(https://images.unsplash.com/photo-${id}?w=400)`, backgroundSize:"cover", backgroundPosition:"center" }} />
+          ))}
+        </div>
+        <div style={{ textAlign:"center", fontFamily:"'Inter',sans-serif", fontSize:"10px", color:"rgba(245,239,232,0.2)", letterSpacing:"0.22em", textTransform:"uppercase", marginTop:"12px", fontWeight:400 }}>
+          Thousands of photos · No story · No order · No meaning
+        </div>
+      </div>
+    ),
+    // Slide 3 — The Solution
+    () => (
+      <div style={{ maxWidth:"900px", margin:"0 auto", width:"100%" }}>
+        <div style={{ fontFamily:"'Inter',sans-serif", fontSize:"10px", letterSpacing:"0.35em", textTransform:"uppercase", color:"var(--sunset)", fontWeight:600, marginBottom:"24px", display:"flex", alignItems:"center", gap:"10px" }}>
+          <span style={{ width:"5px", height:"5px", borderRadius:"50%", background:"var(--sunset)", boxShadow:"0 0 10px var(--sunset)", display:"inline-block" }} />
+          The Solution
+        </div>
+        <h1 style={{ fontFamily:"'Inter',sans-serif", fontWeight:100, fontSize:"clamp(28px,4vw,56px)", letterSpacing:"0.18em", textTransform:"uppercase", lineHeight:1.0, marginBottom:"20px" }}>
+          Every memory gets the space it{" "}
+          <span style={{ background:"linear-gradient(135deg,#FFB47A,#E8743C)", WebkitBackgroundClip:"text", backgroundClip:"text", WebkitTextFillColor:"transparent" }}>deserves.</span>
+        </h1>
+        <p style={{ fontFamily:"'Inter',sans-serif", fontWeight:300, fontSize:"15px", color:"rgba(245,239,232,0.6)", lineHeight:1.8, maxWidth:"520px", marginBottom:"28px" }}>
+          Vault turns your photos into a beautifully organized archive — built around the people, places, and chapters that matter to you.
+        </p>
+        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", background:"#1A1410", border:"1px solid rgba(245,239,232,0.07)", overflow:"hidden" }}>
+          <div style={{ backgroundImage:"url(https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800)", backgroundSize:"cover", backgroundPosition:"center", minHeight:"240px", filter:"saturate(0.88)" }} />
+          <div style={{ padding:"28px 32px", display:"flex", flexDirection:"column", justifyContent:"center" }}>
+            <div style={{ fontFamily:"'Inter',sans-serif", fontSize:"9px", letterSpacing:"0.28em", textTransform:"uppercase", color:"rgba(245,239,232,0.3)", marginBottom:"14px", fontWeight:500 }}>Aug 12, 2023 · Amalfi Coast, Italy</div>
+            <div style={{ fontFamily:"'Inter',sans-serif", fontWeight:200, fontSize:"18px", letterSpacing:"0.12em", textTransform:"uppercase", color:"#F5EFE8", lineHeight:1.2, marginBottom:"12px" }}>Golden Hour on the Cliffs</div>
+            <div style={{ fontFamily:"'Inter',sans-serif", fontSize:"12px", color:"rgba(245,239,232,0.55)", lineHeight:1.75, fontWeight:300 }}>We almost didn't stop the car. The light lasted seven minutes and we stood there in silence, letting it happen.</div>
+            <div style={{ display:"flex", alignItems:"center", gap:"6px", marginTop:"14px", fontFamily:"'Inter',sans-serif", fontSize:"9px", color:"var(--sunset)", letterSpacing:"0.22em", textTransform:"uppercase", fontWeight:600 }}>
+              <span style={{ width:"4px", height:"4px", borderRadius:"50%", background:"var(--sunset)", display:"inline-block" }} />
+              Adventurous · Summer in Italy
+            </div>
+          </div>
+        </div>
+      </div>
+    ),
+    // Slide 4 — AI
+    () => (
+      <div style={{ maxWidth:"860px", margin:"0 auto", width:"100%" }}>
+        <div style={{ fontFamily:"'Inter',sans-serif", fontSize:"10px", letterSpacing:"0.35em", textTransform:"uppercase", color:"var(--sunset)", fontWeight:600, marginBottom:"24px", display:"flex", alignItems:"center", gap:"10px" }}>
+          <span style={{ width:"5px", height:"5px", borderRadius:"50%", background:"var(--sunset)", boxShadow:"0 0 10px var(--sunset)", display:"inline-block" }} />
+          The AI
+        </div>
+        <h1 style={{ fontFamily:"'Inter',sans-serif", fontWeight:100, fontSize:"clamp(28px,4vw,60px)", letterSpacing:"0.18em", textTransform:"uppercase", lineHeight:1.0, marginBottom:"20px" }}>
+          Import a photo.<br/>Get a{" "}
+          <span style={{ background:"linear-gradient(135deg,#FFB47A,#E8743C)", WebkitBackgroundClip:"text", backgroundClip:"text", WebkitTextFillColor:"transparent" }}>memory.</span>
+        </h1>
+        <p style={{ fontFamily:"'Inter',sans-serif", fontWeight:300, fontSize:"15px", color:"rgba(245,239,232,0.6)", lineHeight:1.8, maxWidth:"500px", marginBottom:"36px" }}>
+          Vault's AI looks at your photos and writes the story for you. It knows a screenshot from a milestone. It names the moments you couldn't find words for.
+        </p>
+        <div style={{ display:"grid", gridTemplateColumns:"1fr 32px 1fr 32px 1fr", alignItems:"stretch", gap:"0" }}>
+          {[
+            { icon:"📷", label:"You upload", sub:"Any photo from your camera roll" },
+            { icon:"✦", label:"AI analyzes", sub:"Identifies places, emotions, significance" },
+            { icon:"📖", label:"You get a story", sub:"A title and description written like a memory" },
+          ].map((s, i) => (
+            <React.Fragment key={i}>
+              <div style={{ background:"#141210", border:"1px solid rgba(245,239,232,0.07)", padding:"28px 24px", textAlign:"center" }}>
+                <div style={{ fontSize:"26px", marginBottom:"16px" }}>{s.icon}</div>
+                <div style={{ fontFamily:"'Inter',sans-serif", fontWeight:200, fontSize:"13px", letterSpacing:"0.2em", textTransform:"uppercase", color:"#F5EFE8", marginBottom:"10px" }}>{s.label}</div>
+                <div style={{ fontFamily:"'Inter',sans-serif", fontSize:"11px", color:"rgba(245,239,232,0.4)", fontWeight:300, lineHeight:1.6 }}>{s.sub}</div>
+              </div>
+              {i < 2 && <div style={{ display:"flex", alignItems:"center", justifyContent:"center", fontSize:"16px", color:"rgba(232,116,60,0.35)" }}>→</div>}
+            </React.Fragment>
+          ))}
+        </div>
+      </div>
+    ),
+    // Slide 5 — Life Thread
+    () => (
+      <div style={{ maxWidth:"820px", margin:"0 auto", width:"100%" }}>
+        <div style={{ fontFamily:"'Inter',sans-serif", fontSize:"10px", letterSpacing:"0.35em", textTransform:"uppercase", color:"var(--sunset)", fontWeight:600, marginBottom:"24px", display:"flex", alignItems:"center", gap:"10px" }}>
+          <span style={{ width:"5px", height:"5px", borderRadius:"50%", background:"var(--sunset)", boxShadow:"0 0 10px var(--sunset)", display:"inline-block" }} />
+          The Life Thread
+        </div>
+        <h1 style={{ fontFamily:"'Inter',sans-serif", fontWeight:100, fontSize:"clamp(28px,4vw,60px)", letterSpacing:"0.18em", textTransform:"uppercase", lineHeight:1.0, marginBottom:"20px" }}>
+          One thread.{" "}
+          <span style={{ background:"linear-gradient(135deg,#FFB47A,#E8743C)", WebkitBackgroundClip:"text", backgroundClip:"text", WebkitTextFillColor:"transparent" }}>Every chapter.</span>
+        </h1>
+        <p style={{ fontFamily:"'Inter',sans-serif", fontWeight:300, fontSize:"15px", color:"rgba(245,239,232,0.6)", lineHeight:1.8, maxWidth:"500px", marginBottom:"36px" }}>
+          Your vaults weave together into a single scrollable timeline of your life. Every trip. Every relationship. Every era.
+        </p>
+        <div style={{ position:"relative", paddingLeft:"36px", borderLeft:"1px solid rgba(232,116,60,0.2)" }}>
+          {[
+            { year:"2018", title:"College Years Begin", sub:"Era · 2018 — 2022 · 94 memories", gold:false },
+            { year:"2021", title:"First Real Job", sub:"Milestone · Career", gold:true },
+            { year:"2023", title:"Summer in Italy", sub:"Travel · Jul — Sep 2023 · 38 memories", gold:false },
+          ].map((ev, i) => (
+            <div key={i} style={{ display:"grid", gridTemplateColumns:"120px 1fr", gap:"24px", padding:"20px 0", borderBottom: i < 2 ? "1px solid rgba(245,239,232,0.05)" : "none", alignItems:"center", position:"relative" }}>
+              <div style={{ position:"absolute", left:"-41px", top:"50%", transform:"translateY(-50%)", width:"9px", height:"9px", borderRadius:"50%", background:ev.gold?"#E8A840":"var(--sunset)", boxShadow:`0 0 12px ${ev.gold?"rgba(232,168,64,0.5)":"rgba(232,116,60,0.5)"}` }} />
+              <div style={{ fontFamily:"'Inter',sans-serif", fontWeight:200, fontSize:"16px", letterSpacing:"0.15em", color:ev.gold?"#E8A840":"var(--sunset)" }}>{ev.year}</div>
+              <div>
+                <div style={{ fontFamily:"'Inter',sans-serif", fontWeight:200, fontSize:"16px", letterSpacing:"0.12em", textTransform:"uppercase", color:"#F5EFE8", marginBottom:"4px" }}>{ev.title}</div>
+                <div style={{ fontFamily:"'Inter',sans-serif", fontSize:"11px", color:"rgba(245,239,232,0.35)", fontWeight:300, letterSpacing:"0.06em" }}>{ev.sub}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    ),
+    // Slide 6 — CTA
+    () => (
+      <div style={{ textAlign:"center", maxWidth:"680px", margin:"0 auto" }}>
+        <div style={{ fontFamily:"'Inter',sans-serif", fontSize:"10px", letterSpacing:"0.35em", textTransform:"uppercase", color:"var(--sunset)", fontWeight:600, marginBottom:"28px", display:"flex", alignItems:"center", justifyContent:"center", gap:"10px" }}>
+          <span style={{ width:"5px", height:"5px", borderRadius:"50%", background:"var(--sunset)", boxShadow:"0 0 10px var(--sunset)", display:"inline-block" }} />
+          You're ready
+        </div>
+        <h1 style={{ fontFamily:"'Inter',sans-serif", fontWeight:100, fontSize:"clamp(52px,8vw,100px)", letterSpacing:"0.18em", textTransform:"uppercase", lineHeight:1.0, marginBottom:"28px" }}>
+          <span style={{ background:"linear-gradient(135deg,#FFB47A,#E8743C,#C04820)", WebkitBackgroundClip:"text", backgroundClip:"text", WebkitTextFillColor:"transparent" }}>Start your<br/>archive.</span>
+        </h1>
+        <p style={{ fontFamily:"'Inter',sans-serif", fontWeight:300, fontSize:"17px", color:"rgba(245,239,232,0.6)", lineHeight:1.8, maxWidth:"400px", margin:"0 auto 48px" }}>
+          Your memories are waiting. It takes 2 minutes to create your first vault.
+        </p>
+        <div style={{ display:"flex", gap:"14px", justifyContent:"center", flexWrap:"wrap" }}>
+          <button onClick={onDismiss}
+            style={{ background:"#F5EFE8", color:"#0E0B0A", border:"none", borderRadius:"60px", padding:"16px 44px", fontFamily:"'Inter',sans-serif", fontSize:"11px", fontWeight:600, letterSpacing:"0.18em", textTransform:"uppercase", cursor:"pointer" }}>
+            Explore the Demo →
+          </button>
+        </div>
+      </div>
+    ),
+  ];
 
-      {/* Progress dots */}
-      <div style={{ display:"flex", gap:"8px", marginBottom:"20px" }}>
-        {ONBOARDING_STEPS.map((_, i) => (
-          <div key={i} onClick={() => setStep(i)} style={{ width: i === step ? "24px" : "8px", height:"8px", borderRadius:"40px", background: i === step ? "var(--gold)" : i < step ? "var(--sunset3)" : "rgba(245,237,224,0.2)", transition:"all 0.3s ease", cursor:"pointer" }} />
-        ))}
+  const SlideContent = slides[step];
+
+  return (
+    <div className="fi" style={{ position:"fixed", inset:0, zIndex:500, background:"rgba(8,5,4,0.97)", backdropFilter:"blur(24px)", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"80px 48px 100px" }}>
+
+      {/* Skip */}
+      {step < total - 1 && (
+        <button onClick={onDismiss} style={{ position:"absolute", top:"32px", right:"48px", fontFamily:"'Inter',sans-serif", fontSize:"11px", letterSpacing:"0.18em", textTransform:"uppercase", color:"rgba(245,239,232,0.3)", background:"none", border:"none", cursor:"pointer", fontWeight:400, transition:"color 0.2s" }}
+          onMouseEnter={e => e.target.style.color="rgba(245,239,232,0.7)"}
+          onMouseLeave={e => e.target.style.color="rgba(245,239,232,0.3)"}>
+          Skip →
+        </button>
+      )}
+
+      {/* Slide content */}
+      <div className="fi" key={step} style={{ flex:1, display:"flex", alignItems:"center", justifyContent:"center", width:"100%" }}>
+        <SlideContent />
       </div>
 
-      {/* Card */}
-      <div className="si" style={{ background:"var(--bg2)", border:"1px solid var(--border)", borderRadius:"24px", padding:"32px 28px", width:"100%", maxWidth:"480px", margin:"0 20px" }}>
-        <div style={{ textAlign:"center", marginBottom:"20px" }}>
-          <div style={{ fontSize:"40px", marginBottom:"14px" }}>{current.emoji}</div>
-          <div style={{ fontFamily:"'Playfair Display',serif", fontSize:"24px", fontWeight:700, color:"var(--cream)", marginBottom:"12px", lineHeight:1.1 }}>{current.title}</div>
-          <div style={{ fontFamily:"'Raleway',sans-serif", fontSize:"14px", color:"var(--cream70)", fontWeight:300, lineHeight:1.85 }}>{current.body}</div>
+      {/* Bottom nav */}
+      <div style={{ position:"absolute", bottom:"40px", left:0, right:0, display:"flex", alignItems:"center", justifyContent:"space-between", padding:"0 48px" }}>
+        <button onClick={prev} style={{ fontFamily:"'Inter',sans-serif", fontSize:"11px", letterSpacing:"0.18em", textTransform:"uppercase", color:"rgba(245,239,232,0.3)", background:"none", border:"none", cursor:"pointer", opacity:step===0?0:1, transition:"color 0.2s", fontWeight:400 }}
+          onMouseEnter={e => e.target.style.color="rgba(245,239,232,0.7)"}
+          onMouseLeave={e => e.target.style.color="rgba(245,239,232,0.3)"}>← Back</button>
+
+        {/* Dots */}
+        <div style={{ display:"flex", gap:"8px", alignItems:"center" }}>
+          {Array.from({length:total}).map((_,i) => (
+            <div key={i} onClick={() => setStep(i)} style={{ width: i===step?"20px":"5px", height:"5px", borderRadius:"3px", background: i===step?"var(--sunset)":i<step?"rgba(232,116,60,0.4)":"rgba(245,239,232,0.15)", transition:"all 0.3s", cursor:"pointer" }} />
+          ))}
         </div>
 
-        {/* Step counter */}
-        <div style={{ textAlign:"center", fontFamily:"'Raleway',sans-serif", fontSize:"11px", color:"var(--cream40)", marginBottom:"20px", letterSpacing:"0.1em" }}>
-          {step + 1} of {ONBOARDING_STEPS.length}
-        </div>
-
-        {/* Buttons */}
-        <button onClick={next} style={{ width:"100%", background: current.isFinal ? "linear-gradient(135deg,var(--sunset1),var(--sunset3))" : "var(--cream10)", color: current.isFinal ? "var(--cream)" : "var(--cream70)", border: current.isFinal ? "none" : "1px solid var(--borderS)", borderRadius:"12px", padding:"15px", fontFamily:"'Raleway',sans-serif", fontSize:"13px", fontWeight:600, letterSpacing:"0.12em", textTransform:"uppercase", boxShadow: current.isFinal ? "0 4px 20px rgba(196,92,42,0.4)" : "none", marginBottom:"10px" }}>
-          {current.cta}
+        <button onClick={next} style={{ fontFamily:"'Inter',sans-serif", fontSize:"11px", letterSpacing:"0.18em", textTransform:"uppercase", color:"#F5EFE8", background:"none", border:"none", cursor:"pointer", fontWeight:600, transition:"opacity 0.2s" }}>
+          {step === total - 1 ? "" : step === total - 2 ? "Let's go →" : "Next →"}
         </button>
-
-        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-          {step > 0
-            ? <button onClick={prev} style={{ background:"transparent", border:"none", color:"var(--cream40)", fontFamily:"'Raleway',sans-serif", fontSize:"12px", fontWeight:300, padding:"6px 0" }}>← Back</button>
-            : <div />
-          }
-          {!current.isFinal && (
-            <button onClick={onDismiss} style={{ background:"transparent", border:"none", color:"var(--cream40)", fontFamily:"'Raleway',sans-serif", fontSize:"12px", fontWeight:300, padding:"6px 0" }}>
-              Skip — explore on my own
-            </button>
-          )}
-        </div>
       </div>
     </div>
   );
@@ -1744,7 +1861,7 @@ function MainApp({ user }) {
 
       {/* Nav */}
       <nav className="nav-pad" style={{ position:"sticky", top:0, zIndex:50, padding:"16px 48px", display:"flex", justifyContent:"space-between", alignItems:"center", background:"rgba(14,11,10,0.92)", backdropFilter:"blur(24px)", borderBottom:"1px solid var(--border)" }}>
-        <div onClick={() => setView("home")} style={{ fontFamily:"'Fraunces',serif", fontSize:"20px", fontWeight:900, cursor:"pointer", letterSpacing:"0.18em" }}>
+        <div onClick={() => setView("home")} style={{ fontFamily:"'Inter',sans-serif", fontSize:"16px", fontWeight:100, cursor:"pointer", letterSpacing:"0.45em", textTransform:"uppercase" }}>
           <span className="gold-text">VAULT</span>
         </div>
         <div style={{ display:"flex", gap:"4px" }}>
