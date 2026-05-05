@@ -1798,14 +1798,25 @@ function MainApp({ user }) {
     const load = async () => {
       setLoading(true);
       try {
-        const [v, m, ms] = await Promise.all([
+        const [v, m, ms, profile] = await Promise.all([
           db.getVaults(user.id),
           db.getMemories(user.id),
           db.getMilestones(user.id),
+          db.getProfile(user.id),
         ]);
         setVaults(v);
         setMemories(m);
         setMilestones(ms);
+        // Show onboarding if user hasn't seen it yet
+        if (!profile?.has_seen_onboarding) {
+          setIsDemo(true);
+          setVaults(DEMO_VAULTS);
+          setMemories(DEMO_MEMORIES);
+          setMilestones(DEMO_MILESTONES);
+          setShowOnboarding(true);
+          // Mark as seen
+          await db.updateProfile(user.id, { has_seen_onboarding: true });
+        }
       } catch (e) {
         setToast({ message:"Failed to load data", type:"error" });
       }
