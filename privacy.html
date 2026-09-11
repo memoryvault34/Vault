@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vault — Privacy Policy</title>
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    background: #FAF7F3;
+    color: #2A201A;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.65;
+  }
+  .wrap {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 56px 24px 100px;
+  }
+  h1 {
+    font-size: 28px;
+    margin-bottom: 4px;
+    color: #1A1410;
+  }
+  .updated {
+    color: #8A7A6E;
+    font-size: 14px;
+    margin-bottom: 12px;
+  }
+  .intro {
+    font-size: 15px;
+    color: #5A4A3E;
+    background: #F0E7DD;
+    padding: 16px 18px;
+    border-radius: 10px;
+    margin-bottom: 32px;
+  }
+  h2 {
+    font-size: 20px;
+    margin-top: 44px;
+    margin-bottom: 12px;
+    color: #C4622A;
+  }
+  h3 {
+    font-size: 16px;
+    margin-top: 24px;
+    margin-bottom: 8px;
+    color: #3A2E26;
+  }
+  p, li {
+    font-size: 15.5px;
+    color: #3A2E26;
+  }
+  ul {
+    padding-left: 22px;
+  }
+  li {
+    margin-bottom: 8px;
+  }
+  a {
+    color: #C4622A;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 14.5px;
+  }
+  th, td {
+    text-align: left;
+    padding: 10px 12px;
+    border-bottom: 1px solid #E5D9CC;
+    vertical-align: top;
+  }
+  th {
+    color: #8A7A6E;
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .contact-box {
+    margin-top: 48px;
+    padding: 20px 22px;
+    background: #F0E7DD;
+    border-radius: 12px;
+  }
+  .note {
+    font-size: 13.5px;
+    color: #8A7A6E;
+    font-style: italic;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Vault — Privacy Policy</h1>
+  <div class="updated">Last updated: September 2026</div>
+
+  <div class="intro">
+    Vault is a private space for your memories. This policy explains, in plain language, what information Vault collects, why, and the choices you have — including specific rights available to users in the European Union/EEA and California. We've tried to write this the way we'd want a privacy policy written to us.
+  </div>
+
+  <h2>1. Who this policy covers, and who's responsible for your data</h2>
+  <p>This policy applies to anyone who uses the Vault app or website. Vault is operated by an independent developer (Baha Erol), reachable at the email address at the bottom of this page. For the purposes of EU/UK data protection law, this developer is the "data controller" of your information — the party responsible for deciding how and why it's used.</p>
+
+  <h2>2. What we collect</h2>
+  <table>
+    <tr><th>Category</th><th>What it includes</th><th>Why we collect it</th></tr>
+    <tr>
+      <td>Account information</td>
+      <td>Email address, password (encrypted), optional display name</td>
+      <td>To create and secure your account</td>
+    </tr>
+    <tr>
+      <td>Photos you import</td>
+      <td>Only photos you actively select from your camera roll — Vault never scans your whole library automatically</td>
+      <td>To build your memory archive</td>
+    </tr>
+    <tr>
+      <td>Location data already in your photos</td>
+      <td>GPS coordinates already embedded in a photo's file (if present)</td>
+      <td>To show a real place name instead of raw coordinates. Vault does not track your live location and never accesses location data beyond what's already saved inside a photo you chose to import.</td>
+    </tr>
+    <tr>
+      <td>Push notification token</td>
+      <td>A device identifier issued by Apple, only if you enable notifications</td>
+      <td>To deliver "On This Day" reminders</td>
+    </tr>
+    <tr>
+      <td>Basic technical data</td>
+      <td>Device type, app version, crash logs</td>
+      <td>To keep the app working and fix bugs</td>
+    </tr>
+  </table>
+  <p>We do not collect precise real-time location, contacts, browsing history outside the app, or any data from your camera roll beyond the specific photos you choose to import.</p>
+
+  <h2>3. How your information is used</h2>
+  <ul>
+    <li>To build and display your personal memory archive.</li>
+    <li>To generate AI-written captions and help organize memories. Imported photos are sent to Anthropic's Claude AI model for this analysis — only the image and its embedded metadata are shared, not your account details, email, or other personal information.</li>
+    <li>To translate saved GPS coordinates into a readable place name.</li>
+    <li>To send optional reminder notifications, if you've turned them on.</li>
+    <li>To maintain security and diagnose technical problems.</li>
+  </ul>
+  <p>We do not use your photos or data to train AI models beyond the single analysis needed to caption that specific memory, and we do not use your information for advertising — Vault does not run ads or use ad-tracking of any kind.</p>
+
+  <h2>4. Who your information is shared with</h2>
+  <p>Vault does not sell your personal information, and never has. Your information is only shared with the service providers Vault depends on to function ("subprocessors"), each bound by their own security and data protection terms:</p>
+  <table>
+    <tr><th>Provider</th><th>Role</th><th>Data involved</th></tr>
+    <tr><td>Supabase</td><td>Database, authentication, and photo storage</td><td>Account info, photos, memory data</td></tr>
+    <tr><td>Cloudflare</td><td>Runs the background process connecting Vault to the AI</td><td>Photo passed through, not stored by Cloudflare</td></tr>
+    <tr><td>Anthropic</td><td>AI (Claude) that analyzes photo content</td><td>The photo and its embedded metadata only</td></tr>
+    <tr><td>Apple</td><td>Push notification delivery, app distribution</td><td>Device push token</td></tr>
+  </table>
+  <p>These providers may process data on servers located outside your home country, including in the United States. Where required, we rely on these providers' own compliance mechanisms (such as Standard Contractual Clauses) for international transfers of EU/UK user data.</p>
+  <p>We may also disclose information if required by law, or to protect the rights, safety, or property of Vault or its users.</p>
+
+  <h2>5. How long we keep your information</h2>
+  <p>Your data is kept for as long as your account exists. If you delete your account, everything tied to it — photos, memories, vaults, and account details — is permanently and immediately deleted from our active systems. Backups, if any exist, are purged on a routine cycle and are not used to restore deleted accounts.</p>
+
+  <h2>6. Your rights and choices</h2>
+  <ul>
+    <li><strong>Delete your account and all data</strong> anytime, directly in the app: Settings → Delete Account. This is instant and permanent.</li>
+    <li><strong>Access or correct your information</strong> by emailing us — we'll respond within 30 days.</li>
+    <li><strong>Ask a question</strong> about how your data is handled anytime.</li>
+  </ul>
+
+  <h3>If you're in the European Union, EEA, or UK (GDPR)</h3>
+  <p>You have the right to: access the personal data we hold about you; request correction of inaccurate data; request erasure ("right to be forgotten"); restrict or object to certain processing; receive your data in a portable format; and withdraw consent at any time where processing is based on consent. Our legal basis for processing your data is your consent (when you create an account) and our need to perform the service you've requested (a contract basis). You also have the right to lodge a complaint with your local data protection supervisory authority if you believe your rights have been violated.</p>
+
+  <h3>If you're a California resident (CCPA/CPRA)</h3>
+  <p>You have the right to know what personal information we collect, request deletion of your personal information, correct inaccurate information, and not be discriminated against for exercising these rights. <strong>Vault does not sell or share personal information</strong> for cross-context behavioral advertising, so there is no "opt-out of sale" mechanism required. You can exercise any of these rights by emailing us.</p>
+
+  <h2>7. Children's privacy</h2>
+  <p>Vault is not directed at children under 13 (or under 16 where required by local law), and we do not knowingly collect information from children in these age groups. If you believe a child has created an account, please contact us and we will delete it promptly.</p>
+
+  <h2>8. Automated processing and AI</h2>
+  <p>Vault uses an AI model (Anthropic's Claude) to analyze photos you import and suggest captions or organization. This process does not make any decision that produces a legal or similarly significant effect on you — it only assists with organizing your own personal archive, and any AI-generated caption can be edited or removed by you at any time.</p>
+
+  <h2>9. Security</h2>
+  <p>Your data is encrypted in transit and at rest through our storage provider, which follows industry-standard security practices. No method of storing or transmitting data is 100% secure, but we take reasonable, industry-standard steps to protect your information, including access controls and encrypted connections throughout the app.</p>
+
+  <h2>10. Changes to this policy</h2>
+  <p>If this policy changes in a meaningful way, we'll update the date at the top of this page and, where appropriate, notify you inside the app before the change takes effect.</p>
+
+  <div class="contact-box">
+    <strong>Questions, requests, or complaints about your data?</strong><br>
+    Email us at <a href="mailto:memoryvault34@gmail.com">memoryvault34@gmail.com</a> — we aim to respond within 30 days.
+  </div>
+
+  <p class="note" style="margin-top:32px;">This policy is written to accurately describe Vault's actual data practices and to address the core rights required under Apple's App Store guidelines, the GDPR, and the CCPA/CPRA. It is not a substitute for advice from a licensed attorney, and does not cover every jurisdiction-specific requirement that may eventually apply as Vault grows (for example, additional US state laws or a formal Terms of Service). Professional legal review is recommended before scaling to a wider audience or introducing paid features.</p>
+
+</div>
+</body>
+</html>
