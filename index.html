@@ -166,6 +166,14 @@
       .add-form { margin: 16px 20px !important; }
       .collage-grid { grid-template-rows: repeat(2,130px) !important; }
     }
+
+    /* AI step-by-step cards: stack instead of overflowing on any screen
+       narrower than the slide's own design width (covers phone portrait
+       AND landscape, not just the usual 600px breakpoint) */
+    @media (max-width:860px) {
+      .ai-steps-grid { grid-template-columns: 1fr !important; gap: 12px !important; }
+      .ai-steps-arrow { display: none !important; }
+    }
   </style>
 </head>
 <body>
@@ -1718,7 +1726,7 @@ function OnboardingOverlay({ onDismiss }) {
         <p style={{ fontFamily:"'Inter',sans-serif", fontWeight:300, fontSize:"15px", color:"rgba(245,239,232,0.6)", lineHeight:1.8, maxWidth:"500px", marginBottom:"36px" }}>
           Vault's AI looks at your photos and writes the story for you. It knows a screenshot from a milestone. It names the moments you couldn't find words for.
         </p>
-        <div style={{ display:"grid", gridTemplateColumns:"1fr 32px 1fr 32px 1fr", alignItems:"stretch", gap:"0" }}>
+        <div className="ai-steps-grid" style={{ display:"grid", gridTemplateColumns:"1fr 32px 1fr 32px 1fr", alignItems:"stretch", gap:"0" }}>
           {[
             { icon:"📷", label:"You upload", sub:"Any photo from your camera roll" },
             { icon:"✦", label:"AI analyzes", sub:"Identifies places, emotions, significance" },
@@ -1730,7 +1738,7 @@ function OnboardingOverlay({ onDismiss }) {
                 <div style={{ fontFamily:"'Inter',sans-serif", fontWeight:200, fontSize:"13px", letterSpacing:"0.2em", textTransform:"uppercase", color:"#F5EFE8", marginBottom:"10px" }}>{s.label}</div>
                 <div style={{ fontFamily:"'Inter',sans-serif", fontSize:"11px", color:"rgba(245,239,232,0.4)", fontWeight:300, lineHeight:1.6 }}>{s.sub}</div>
               </div>
-              {i < 2 && <div style={{ display:"flex", alignItems:"center", justifyContent:"center", fontSize:"16px", color:"rgba(232,116,60,0.35)" }}>→</div>}
+              {i < 2 && <div className="ai-steps-arrow" style={{ display:"flex", alignItems:"center", justifyContent:"center", fontSize:"16px", color:"rgba(232,116,60,0.35)" }}>→</div>}
             </React.Fragment>
           ))}
         </div>
